@@ -1,3 +1,11 @@
 ## 1.0.0
 
-- Initial version, created by Stagehand
+- 上传至 pub 库
+
+## 1.0.1
+
+- 完善 time 类
+
+## 1.0.2
+
+- 修改 time parse 关于时区的问题

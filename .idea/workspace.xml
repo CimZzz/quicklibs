@@ -2,20 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3954fad3-5b61-4b0a-b98b-8c3553b3c000" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/LICENSE" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/src/iterators/each.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/src/time/time.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/src/time/time_format.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/src/time/time_measure.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CHANGELOG.md" beforeDir="false" afterPath="$PROJECT_DIR$/CHANGELOG.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/quicklibs_example.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/quicklibs_example.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/quicklibs.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/quicklibs.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/src/format/timeformat.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/src/time/time.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/src/time/time.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/src/time/time_format.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/src/time/time_format.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/quicklibs.iml" beforeDir="false" afterPath="$PROJECT_DIR$/quicklibs.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/quicklibs_test.dart" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -47,7 +39,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file:///usr/local/Cellar/dart/2.3.0/libexec/lib/core/duration.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="184">
+            <state relative-caret-position="-2340">
               <caret line="51" column="6" selection-start-line="51" selection-start-column="6" selection-end-line="51" selection-end-column="6" />
             </state>
           </provider>
@@ -56,8 +48,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/src/time/time.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="405">
-              <caret line="27" column="17" selection-start-line="27" selection-start-column="17" selection-end-line="27" selection-end-column="17" />
+            <state relative-caret-position="375">
+              <caret line="25" column="8" selection-start-line="25" selection-start-column="8" selection-end-line="25" selection-end-column="8" />
               <folding>
                 <element signature="e#1#25#0" expanded="true" />
               </folding>
@@ -68,43 +60,41 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/src/time/time_format.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="183">
-              <caret line="308" column="14" selection-start-line="308" selection-start-column="14" selection-end-line="308" selection-end-column="14" />
+            <state relative-caret-position="338">
+              <caret line="102" column="9" lean-forward="true" selection-start-line="102" selection-start-column="9" selection-end-line="102" selection-end-column="9" />
               <folding>
-                <element signature="e#724#1517#0" />
-                <element signature="e#1586#2159#0" />
-                <element signature="e#2223#2855#0" />
-                <element signature="e#2976#3248#0" />
-                <element signature="e#3305#3562#0" />
-                <element signature="e#3564#3630#0" />
+                <element signature="e#11912#13043#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/local/Cellar/dart/2.3.0/libexec/lib/core/exceptions.dart">
+        <entry file="file://$PROJECT_DIR$/example/quicklibs_example.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="88">
-              <caret line="19" column="16" selection-start-line="19" selection-start-column="16" selection-end-line="19" selection-end-column="16" />
+            <state relative-caret-position="105">
+              <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/local/Cellar/dart/2.3.0/libexec/lib/async/future.dart">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="718" lean-forward="true" selection-start-line="718" selection-end-line="718" />
+        <entry file="file://$PROJECT_DIR$/CHANGELOG.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="150">
+                <caret line="10" column="23" selection-start-line="10" selection-start-column="23" selection-end-line="10" selection-end-column="23" />
+              </first_editor>
+              <second_editor />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/example/quicklibs_example.dart">
+        <entry file="file://$PROJECT_DIR$/pubspec.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="4" selection-start-line="4" selection-end-line="4" />
+            <state relative-caret-position="30">
+              <caret line="2" column="14" selection-start-line="2" selection-start-column="14" selection-end-line="2" selection-end-column="14" />
             </state>
           </provider>
         </entry>
@@ -121,8 +111,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file:///usr/local/Cellar/dart/2.3.0/libexec/lib/core/date_time.dart">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="527">
-              <caret line="179" column="2" selection-start-line="179" selection-start-column="2" selection-end-line="179" selection-end-column="2" />
+            <state relative-caret-position="394">
+              <caret line="333" column="28" selection-start-line="333" selection-start-column="28" selection-end-line="333" selection-end-column="28" />
             </state>
           </provider>
         </entry>
@@ -148,6 +138,10 @@
       <find>generateTimeFormat</find>
       <find>static</find>
       <find>utc()</find>
+      <find>parse</find>
+      <find>TimePar</find>
+      <find>TimeParseBuilder</find>
+      <find>subtr</find>
     </findStrings>
     <replaceStrings>
       <replace>day</replace>
@@ -156,6 +150,8 @@
       <replace>second</replace>
       <replace>Placeholder</replace>
       <replace>placeholder</replace>
+      <replace>TimeParseBuilder</replace>
+      <replace>_TimeParseBuilder</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -167,13 +163,14 @@
         <option value="$PROJECT_DIR$/lib/src/format/timeformat.dart" />
         <option value="$PROJECT_DIR$/lib/src/iterators/each.dart" />
         <option value="$PROJECT_DIR$/LICENSE" />
-        <option value="$PROJECT_DIR$/pubspec.yaml" />
         <option value="$PROJECT_DIR$/lib/src/formats/timeformat.dart" />
         <option value="$PROJECT_DIR$/lib/quicklibs.dart" />
-        <option value="$PROJECT_DIR$/lib/src/time/time_format.dart" />
         <option value="$PROJECT_DIR$/lib/src/time/time_measure.dart" />
         <option value="$PROJECT_DIR$/lib/src/time/time.dart" />
+        <option value="$PROJECT_DIR$/lib/src/time/time_format.dart" />
         <option value="$PROJECT_DIR$/example/quicklibs_example.dart" />
+        <option value="$PROJECT_DIR$/CHANGELOG.md" />
+        <option value="$PROJECT_DIR$/pubspec.yaml" />
       </list>
     </option>
   </component>
@@ -229,7 +226,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1559579579657" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1559582281697" />
     <property name="dart.analysis.tool.window.force.activate" value="false" />
     <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Dart" />
     <property name="show.migrate.to.gradle.popup" value="false" />
@@ -303,12 +300,21 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1559533378287</updated>
-      <workItem from="1559570740130" duration="8612000" />
+      <workItem from="1559570740130" duration="11310000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8612000" />
+    <option name="totallyTimeSpent" value="11310000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1680" height="953" extended-state="6" />
@@ -330,8 +336,8 @@
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39953542" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Dart Analysis" order="7" weight="0.3292683" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.329849" />
+      <window_info anchor="bottom" id="Dart Analysis" order="7" weight="0.32868758" />
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.32868758" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
@@ -356,12 +362,22 @@
   <component name="XDebuggerManager">
     <watches-manager>
       <configuration name="DartCommandLineRunConfigurationType">
-        <watch expression="other == this._placeHolder" language="Dart" />
+        <watch expression="timeZoneOffset" language="Dart" />
       </configuration>
     </watches-manager>
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="watch">
+      <expression>
+        <expression-string>timeZoneOffset</expression-string>
+        <language-id>Dart</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>t</expression-string>
+        <language-id>Dart</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
       <expression>
         <expression-string>other == this._placeHolder</expression-string>
         <language-id>Dart</language-id>
@@ -426,13 +442,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pubspec.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" lean-forward="true" selection-start-line="9" selection-end-line="9" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/Cellar/dart/2.3.0/libexec/lib/core/errors.dart">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-54">
@@ -461,10 +470,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/quicklibs.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="5" column="26" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file:///usr/local/Cellar/dart/2.3.0/libexec/lib/core/duration.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
+        <state relative-caret-position="-2340">
           <caret line="51" column="6" selection-start-line="51" selection-start-column="6" selection-end-line="51" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/Cellar/dart/2.3.0/libexec/lib/core/date_time.dart">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="394">
+          <caret line="333" column="28" selection-start-line="333" selection-start-column="28" selection-end-line="333" selection-end-column="28" />
         </state>
       </provider>
     </entry>
@@ -475,39 +498,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/quicklibs.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="5" column="26" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/local/Cellar/dart/2.3.0/libexec/lib/core/date_time.dart">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="527">
-          <caret line="179" column="2" selection-start-line="179" selection-start-column="2" selection-end-line="179" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/src/time/time_format.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="183">
-          <caret line="308" column="14" selection-start-line="308" selection-start-column="14" selection-end-line="308" selection-end-column="14" />
+        <state relative-caret-position="338">
+          <caret line="102" column="9" lean-forward="true" selection-start-line="102" selection-start-column="9" selection-end-line="102" selection-end-column="9" />
           <folding>
-            <element signature="e#724#1517#0" />
-            <element signature="e#1586#2159#0" />
-            <element signature="e#2223#2855#0" />
-            <element signature="e#2976#3248#0" />
-            <element signature="e#3305#3562#0" />
-            <element signature="e#3564#3630#0" />
+            <element signature="e#11912#13043#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/src/time/time.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="27" column="17" selection-start-line="27" selection-start-column="17" selection-end-line="27" selection-end-column="17" />
+        <state relative-caret-position="375">
+          <caret line="25" column="8" selection-start-line="25" selection-start-column="8" selection-end-line="25" selection-end-column="8" />
           <folding>
             <element signature="e#1#25#0" expanded="true" />
           </folding>
@@ -516,8 +520,25 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/example/quicklibs_example.dart">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" selection-start-line="4" selection-end-line="4" />
+        <state relative-caret-position="105">
+          <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CHANGELOG.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="150">
+            <caret line="10" column="23" selection-start-line="10" selection-start-column="23" selection-end-line="10" selection-end-column="23" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pubspec.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="14" selection-start-line="2" selection-start-column="14" selection-end-line="2" selection-end-column="14" />
         </state>
       </provider>
     </entry>

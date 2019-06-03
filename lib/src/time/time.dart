@@ -17,13 +17,13 @@ abstract class Time {
 	/// 方法生成指定 formatStr、otherPlaceholder 的时间字符串解析方法
 	/// 每次调用只需传 String 参数即可生成 [DateTime] 对象
 	/// 如果多次执行同样的格式化字符串，推荐使用此方法优化执行时间
-	static TimeParser generateParseMethod(String formatStr, {List<TimePlaceholder> otherPlaceholder, bool isSafe = false}) =>
-		_generateParseMethod(formatStr, otherPlaceholder, isSafe);
+	static TimeParser generateParseMethod(String formatStr, {List<TimePlaceholder> otherPlaceholder, bool isSafe = false, Duration timeZoneOffset}) =>
+		_generateParseMethod(formatStr, otherPlaceholder, isSafe, timeZoneOffset ?? DateTime.now().timeZoneOffset);
 	
 	
-	/// 解析时间字符串，如果解析成功返回 [DateTime]
-	static DateTime parse(String sourceStr, String formatStr, {List<TimePlaceholder> otherPlaceholder, bool isSafe = false})  =>
-		_parse(sourceStr, formatStr, otherPlaceholder, isSafe);
+	/// 解析时间字符串，如果解析成功返回时间戳
+	static int parse(String sourceStr, String formatStr, {List<TimePlaceholder> otherPlaceholder, bool isSafe = false, Duration timeZoneOffset})  =>
+		_parse(sourceStr, formatStr, otherPlaceholder, isSafe, timeZoneOffset ?? DateTime.now().timeZoneOffset);
 	
 	/// 测量方法体执行时间
 	static Duration measure(void run()) =>

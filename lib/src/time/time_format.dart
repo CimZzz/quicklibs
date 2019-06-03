@@ -13,7 +13,7 @@ part of 'time.dart';
 typedef TimeFormatCallback = void Function(DateTime, int, StringBuffer);
 
 /// 时间解析回调
-typedef TimeParseCallback = void Function(TimeParseBuilder, String);
+typedef TimeParseCallback = void Function(_TimeParseBuilder, String);
 
 /// 定义时间格式化方法包装器
 /// 可以通过 [TimeFormat.generateFormatMethod] 方法生成指定 formatStr、otherPlaceholder 的时间格式化方法
@@ -21,7 +21,7 @@ typedef TimeFormatter = String Function(DateTime);
 
 /// 定义时间字符串解析方法包装器
 /// 可以通过 [TimeFormat.generateParseMethod] 方法生成指定 formatStr、otherPlaceholder 的时间解析方法
-typedef TimeParser = DateTime Function(String);
+typedef TimeParser = int Function(String);
 
 /// 时间格式化占位符
 /// placeholder: 表示时间占位符，必须为 1 个字符，否则该 Time Place Holder 不会生效
@@ -59,7 +59,7 @@ class TimePlaceholder {
 
 /// 时间解析构造器
 /// 对指定字段进行赋值，之后统一生成一个 DateTime
-class TimeParseBuilder {
+class _TimeParseBuilder {
 	int year;
 	int month;
 	int day;
@@ -68,8 +68,9 @@ class TimeParseBuilder {
 	int second;
 	int millisecond;
 	int microsecond;
+	final Duration timeZoneOffset;
 	
-	TimeParseBuilder() {
+	_TimeParseBuilder(this.timeZoneOffset) {
 		_reset();
 	}
 	
@@ -79,16 +80,19 @@ class TimeParseBuilder {
 		hour = minute = second = millisecond = microsecond = 0;
 	}
 	
-	DateTime _build() => DateTime.utc(
-		year,
-		month,
-		day,
-		hour,
-		minute,
-		second,
-		millisecond,
-		microsecond
-	);
+	int _build() {
+		final utcTime = DateTime.utc(
+			year,
+			month,
+			day,
+			hour,
+			minute,
+			second,
+			millisecond,
+			microsecond
+		);
+		return utcTime.subtract(timeZoneOffset).millisecondsSinceEpoch;
+	}
 	
 	@override
 	String toString() {
@@ -104,7 +108,7 @@ class _InnerTimePicker {
 	final int startIdx;
 	final int length;
 	
-	void _parse(String sourceStr, TimeParseBuilder builder) {
+	void _parse(String sourceStr, _TimeParseBuilder builder) {
 		timePlaceholder._parseCallback(builder, sourceStr.substring(startIdx, startIdx + length));
 	}
 	
@@ -419,9 +423,9 @@ void _doFormat(DateTime dateTime, String formatStr, StringBuffer buffer, StringB
 /// 方法生成指定 formatStr、otherPlaceholder 的时间字符串解析方法
 /// 每次调用只需传 String 参数即可生成 [DateTime] 对象
 /// 如果多次执行同样的格式化字符串，推荐使用此方法优化执行时间
-TimeParser _generateParseMethod(String formatStr, List<TimePlaceholder> otherPlaceholder, bool isSafe) {
+TimeParser _generateParseMethod(String formatStr, List<TimePlaceholder> otherPlaceholder, bool isSafe, Duration timeZoneOffset) {
 	assert(formatStr != null);
-	final builder = TimeParseBuilder();
+	final builder = _TimeParseBuilder(timeZoneOffset);
 	final innerTimePickers = _parseTimePicker(formatStr, _listToMap(otherPlaceholder));
 	return (sourceStr) {
 		if(innerTimePickers == null)
@@ -429,18 +433,18 @@ TimeParser _generateParseMethod(String formatStr, List<TimePlaceholder> otherPla
 		builder._reset();
 		if(isSafe) {
 			try {
-				return _doParse(sourceStr, TimeParseBuilder(), innerTimePickers);
+				return _doParse(sourceStr, builder, innerTimePickers);
 			}
 			catch (e) {
 				return null;
 			}
 		}
-		else return _doParse(sourceStr, TimeParseBuilder(), innerTimePickers);
+		else return _doParse(sourceStr, builder, innerTimePickers);
 	};
 }
 
 /// 解析时间字符串，如果解析成功返回 [DateTime]
-DateTime _parse(String sourceStr, String formatStr, List<TimePlaceholder> otherPlaceholder, bool isSafe) {
+int _parse(String sourceStr, String formatStr, List<TimePlaceholder> otherPlaceholder, bool isSafe, Duration timeZoneOffset) {
 	assert(formatStr != null);
 	if(sourceStr == null)
 		return null;
@@ -453,13 +457,13 @@ DateTime _parse(String sourceStr, String formatStr, List<TimePlaceholder> otherP
 	
 	if(isSafe) {
 		try {
-			return _doParse(sourceStr, TimeParseBuilder(), innerTimePickers);
+			return _doParse(sourceStr, _TimeParseBuilder(timeZoneOffset), innerTimePickers);
 		}
 		catch (e) {
 			return null;
 		}
 	}
-	else return _doParse(sourceStr, TimeParseBuilder(), innerTimePickers);
+	else return _doParse(sourceStr, _TimeParseBuilder(timeZoneOffset), innerTimePickers);
 }
 
 
@@ -515,7 +519,7 @@ Set<_InnerTimePicker> _parseTimePicker(String formatStr, Map<String, TimePlaceho
 }
 
 /// 真正执行时间字符串解析逻辑的方法
-DateTime _doParse(String sourceStr, TimeParseBuilder builder, Set<_InnerTimePicker> innerTimePickers) {
+int _doParse(String sourceStr, _TimeParseBuilder builder, Set<_InnerTimePicker> innerTimePickers) {
 	for (var timePicker in innerTimePickers)
 		timePicker._parse(sourceStr, builder);
 	
