@@ -3,6 +3,6 @@
 /// More dartdocs go here.
 library quicklibs;
 
-export 'src/format/timeformat.dart';
-
+export 'src/time/time.dart';
+export 'src/iterators/each.dart';
 // TODO: Export any libraries intended for clients of this package.
