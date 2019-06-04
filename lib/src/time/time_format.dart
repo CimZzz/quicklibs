@@ -523,6 +523,5 @@ int _doParse(String sourceStr, _TimeParseBuilder builder, Set<_InnerTimePicker> 
 	for (var timePicker in innerTimePickers)
 		timePicker._parse(sourceStr, builder);
 	
-	print(builder);
 	return builder._build();
 }

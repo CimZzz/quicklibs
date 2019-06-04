@@ -9,6 +9,8 @@ int _defaultIncrementChangeCallback(int obj) => obj + 1;
 int _defaultReduceChangeCallback(int obj) => obj - 1;
 
 
+/// 简易循环函数
+/// [callback] 循环回调函数，当有返回值时中断循环
 dynamic each<T>({
 	EachBeginCallback<T> beginCallback,
 	EachChangeCallback<T> changeCallback,
@@ -22,10 +24,9 @@ dynamic each<T>({
 			return val;
 		obj = changeCallback(obj);
 	}
-	
 }
 
-/// 简易循环函数
+/// 整数循环函数
 /// 简化常规自增/自减循环
 /// [callback] 循环回调函数，当有返回值时中断循环
 dynamic intEach(
