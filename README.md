@@ -5,75 +5,289 @@ Created from templates made available by Stagehand under a BSD-style
 
 ## 开始使用
 
-当前最新版本为: 1.0.3
+当前最新版本为: 1.0.4
 
 在 "pubspec.yaml" 文件中加入
 ```yaml
 dependencies:
-  quicklibs: ^1.0.3
+  quicklibs: ^1.0.4
 ```
 
 
 ## Usage
 
-[简化迭代器](#简化迭代器): 用提供闭包来实现循环每一步控制逻辑
+- [迭代器](#迭代器): 用提供闭包来实现循环每一步控制逻辑
 
-[Time](#time): 提供一系列关于时间的操作，如时间格式化，字符串转时间等方法
+- [Time](#time): 提供一系列关于时间的操作，如时间格式化，字符串转时间等方法
 
-### 简化迭代器
+###迭代器
 
 闭包命名
 ```dart
 typedef EachBeginCallback<T> = T Function();
 typedef EachCallback<T> = Function(T elem);
-typedef EachOverCallback<T> = bool Function(T obj);
+typedef EachJudgeCallback<T> = bool Function(T obj);
 typedef EachChangeCallback<T> = T Function(T obj);
+typedef EachOverCallback = dynamic Function(dynamic obj);
 ```
 
-- EachBeginCallback<T> 循环初始化回调
-- EachCallback<T> 循环回调
-- EachOverCallback<T> 循环条件判断回调
-- EachChangeCallback<T> 循环执行末尾回调
+- EachBeginCallback<T> 为一次循环回调闭包，只在循环开始时执行一次（可选）
+- EachCallback<T> 为循环体回调闭包，每次循环均会执行（可选）
+- EachJudgeCallback<T> 为判断循环终止回调闭包，当返回 false 时循环终止
+- EachChangeCallback<T> 为末尾循环体回调闭包，每次循环体最后执行
+- EachOverCallback 处理循环结果闭包回调，一般在循环执行完成后调用
 
-以 for 循环为例
-```dart
+
+以 for 循环为例（仅仅为参考样例）
+```text
 for(var i = 0 ; i < 10 ; i ++) {
 	
 };
 ```
 将回调带入后
-```dart
-for(EachBeginCallback; EachOverCallback; EachChangeCallback) {
+```text
+for(EachBeginCallback; EachJudgeCallback; EachChangeCallback) {
     final result = EachCallback;
     if(result != null)
-    	return result;
+    	return EachOverCallback(result);
 }
 ```
 
-对应的迭代函数为
+#### 迭代构造器 EachBuilder\<T>
+
+
+提供一系列构造迭代器的方法
 
 ```dart
-dynamic each<T>({
-	EachBeginCallback<T> beginCallback,
-	EachChangeCallback<T> changeCallback,
-	EachOverCallback<T> overCallback,
-	EachCallback<T> callback,
-}) {
-	T obj = beginCallback();
-	while(!overCallback(obj)) {
-		final val = callback(obj);
-		if(val != null)
-			return val;
-		obj = changeCallback(obj);
-	}
+EachBuilder begin(EachBeginCallback<T> beginCallback); //构建一次循环回调闭包
+
+EachBuilder change(EachChangeCallback<T> changeCallback); //构建末尾循环体回调闭包
+
+EachBuilder judge(EachJudgeCallback<T> judgeCallback); //构建判断循环终止回调闭包
+
+EachBuilder call(EachCallback<T> callback); //构建循环体回调闭包
+
+EachBuilder configAll({
+    EachBeginCallback<T> beginCallback,
+    EachChangeCallback<T> changeCallback,
+    EachJudgeCallback<T> judgeCallback,
+    EachCallback<T> callback
+}); // 一次性配置全部回调（空闭包会被忽略）
+
+void loopOnly(); // 只执行循环不考虑结果
+
+EachResult loop(); // 执行循环返回结果 EachResult
+
+dynamic loopForResult(); // 执行循环直接获取最终结果
+
+```
+
+loopOnly 例子如下:
+
+```dart
+loop1() {
+	final builder = EachBuilder<int>();
+	builder.begin(() => 0);
+	builder.judge((position) => position < 5)
+		.change((position) => position + 1)
+		.call((position) => print(position))
+		.loopOnly();
 }
+```
+
+执行结果为:
+```text
+0
+1
+2
+3
+4
+``` 
+
+如果循环需要返回值，可以通过 loop 函数来获取循环结果，
+至于返回值，可以通过 EachCallback<T> 回调闭包返回，这里分为两种情况:
+
+1. 返回类型为 EachResult 类型，强制中断循环返回 EachResult
+2. 返回类型为 非EachResult 类型，将值存入临时的 List 中（不保证下标位置关系），
+在循环结束后返回一个包装 List 对象的 EachResult 对象
+
+loop 例子如下:
+```dart
+loop2() {
+	final list = EachBuilder<int>()
+			.begin(() => 0)
+			.judge((position) => position < 5)
+			.change((position) => position + 1)
+			.call((position) => position)
+			.loop()
+			.end();
+	
+	print(list);
+}
+```
+
+执行结果为:
+
+```text
+[0, 1, 2, 3, 4]
+```
+
+或者使用 loopForResult 来实现同样的功能
+
+```dart
+loop3() {
+	final list = EachBuilder<int>()
+		.begin(() => 0)
+		.judge((position) => position < 5)
+		.change((position) => position + 1)
+		.call((position) => position)
+		.loopForResult();
+	
+	print(list);
+}
+```
+
+#### 迭代结果 EachResult
+
+如果使用迭代构造器的 loop 方法，则会在执行结束后返回 EachResult 作为循环结果
+
+我们可以操作这个 EachResult 对象来处理返回结果
+
+提供一些处理迭代结果的方法:
+
+```dart
+EachResult then(EachOverCallback overCallback); // 追加处理结果回调
+
+dynamic finish(EachOverCallback overCallback); // 执行一次处理结果回调后返回结果
+
+dynamic end(); // 返回结果
+```
+
+注意: 当 EachResult 返回结果后，无法通过任何方式追加处理结果回调
+
+下面这个例子，通过循环产生一个整数数组，然后通过结果处理返回数组之和:
+
+```dart
+loop4() {
+	final value = EachBuilder<int>()
+		.begin(() => 0)
+		.judge((position) => position < 5)
+		.change((position) => position + 1)
+		.call((position) => position)
+		.loop() // 返回 EachResult
+		.then((list) {
+			var sum = 0;
+			list.forEach((num) {
+				sum += num;
+			});
+			return sum;
+		})
+		.end();
+	print(value);
+}
+```
+
+执行结果如下:
+
+```text
+10
+```
+
+这个处理结果是单链表结构，意味着可以链接多个处理回调。当收到返回结果为 EachResult 类型时，则不在执行下去忽略其余处理回调，如:
+
+```dart
+loop5() {
+	final value = EachBuilder<int>()
+		.begin(() => 0)
+		.judge((position) => position < 5)
+		.change((position) => position + 1)
+		.call((position) => position)
+		.loop() // 返回 EachResult
+		.then((list) {
+		var sum = 0;
+		list.forEach((num) {
+			sum += num;
+		});
+		return sum;
+		})
+		.then((sum){
+			return sum * 10;
+		})
+		.then((sum) {
+			return sum + 50;
+		})
+		.then((sum){
+			return EachResult(sum - 1);
+		})
+		.then((sum) {
+			return sum * 10000;
+		})
+		.end();
+	print(value);
+}
+```
+
+执行结果为:
+
+```text
+149
+```
+
+如果可以明确最后一个处理回调，建议使用 finish 方法
+
+```dart
+loop6() {
+	final value = EachBuilder<int>()
+		.begin(() => 0)
+		.judge((position) => position < 5)
+		.change((position) => position + 1)
+		.call((position) => position)
+		.loop() // 返回 EachResult
+		.then((list) {
+			var sum = 0;
+			list.forEach((num) {
+				sum += num;
+			});
+			return sum;
+		})
+		.then((sum){
+			return sum * 10;
+		})
+		.then((sum) {
+			return sum + 50;
+		})
+		.finish((sum){
+			return EachResult(sum - 1);
+		});
+	print(value);
+}
+```
+
+执行结果为:
+
+```text
+149
 ```
 
 #### 简化整数迭代器
 
+常规循环通过构造器方式直接创建太过繁琐复杂，因为我们并不需要那么强的兼容性，
+我们这里封装了一种常用的整数迭代器，具体还是使用迭代构造器来实现的，绝大部分迭代逻辑无需自己实现
+
 ```dart
 
+/// 整数循环函数，返回循环结果
 dynamic intEach(EachCallback<int> callback,{
+		int start = 0,
+		int end = 0,
+		int total = 0,
+		EachChangeCallback<int> changeCallback
+	});
+
+
+/// 整数循环函数构造器，返回值为 EachBuilder，尚未执行迭代，需要手动执行
+EachBuilder<int> intEachBuilder(
+	EachCallback<int> callback,{
 		int start = 0,
 		int end = 0,
 		int total = 0,
@@ -87,10 +301,12 @@ dynamic intEach(EachCallback<int> callback,{
 - total 表示循环总数(可选)
 - EachChangeCallback 循环执行末尾回调，用于提供自增/自减方法变化下标
 
+**以下实例均以 "intEach" 方法为例**
+
 举个例子，一个最简单的循环
 
 ```dart
-loop1() {
+loop7() {
 	var i = 0;
 	intEach((position) {
 		//do something
@@ -105,7 +321,7 @@ loop1() {
 
 同样也可以写作
 ```dart
-loop2() {
+loop8() {
 	var i = 0;
 	intEach((position) {
 		//do something
@@ -132,7 +348,7 @@ loop2() {
 当然，如果普通的自增自减无法满足需求（比如以指数增长），可以通过 changeCallback 来决定增长趋势
 
 ```dart
-loop3() {
+loop9() {
 	intEach((position) {
 		//do something
 		print("curPosition: $position");
@@ -156,17 +372,21 @@ curPosition: 81
 
 #### 中断循环
 
-对于大部分闭包循环来说，中断循环始终是一个烦人的问题。不过通过这个迭代器，只要在迭代回调中返回任意值，可以很轻易的实现中断闭包循环，而这个值还会当做迭代的最终结果返回
+对于大部分闭包循环来说，中断循环始终是一个烦人的问题。不过通过这个迭代器，只要在迭代回调中返回由 EachResult 包装的值，
+可以很轻易的实现中断闭包循环，而这个值还会当做迭代的最终结果返回
+
+注意: 如果返回值不使用 EachResult 包装，则会记录到一个内部的临时列表中，在循环正常结束后将会返回该列表。如果没有返回值则
+不会触发任何逻辑
 
 如下方一个整数迭代器：
 
 ```dart
 
-loop4() {
+loop10() {
 	var i = 0;
 	var j = intEach((position) {
 		if(position > 50)
-			return i;
+			return EachResult(i);
 		i += position;
 	}, total: 100);
 	
@@ -179,6 +399,30 @@ loop4() {
 ```text
 i: 1275, j: 1275
 ```
+
+#### 快速通过迭代生成列表
+
+在每次迭代返回一个整数值，当循环结束后可以获得由返回值组成的一个列表
+
+如下方一个整数迭代器：
+
+```dart
+loop11() {
+	var list = intEach((position) {
+		return position * 10;
+	}, total: 10);
+	
+	print(list);
+}
+```
+
+执行结果为:
+
+```text
+[0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
+```
+
+
 
 ### Time
 
