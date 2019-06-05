@@ -5,12 +5,12 @@ Created from templates made available by Stagehand under a BSD-style
 
 ## 开始使用
 
-当前最新版本为: 1.0.4
+当前最新版本为: 1.0.5
 
 在 "pubspec.yaml" 文件中加入
 ```yaml
 dependencies:
-  quicklibs: ^1.0.4
+  quicklibs: ^1.0.5
 ```
 
 
@@ -19,6 +19,8 @@ dependencies:
 - [迭代器](#迭代器): 用提供闭包来实现循环每一步控制逻辑
 
 - [Time](#time): 提供一系列关于时间的操作，如时间格式化，字符串转时间等方法
+
+- [转换方法](#转换方法): 提供一系列关于转换具体类型的操作
 
 ###迭代器
 
@@ -29,6 +31,7 @@ typedef EachCallback<T> = Function(T elem);
 typedef EachJudgeCallback<T> = bool Function(T obj);
 typedef EachChangeCallback<T> = T Function(T obj);
 typedef EachOverCallback = dynamic Function(dynamic obj);
+typedef EachOverAsCallback<T> = T Function(dynamic obj);
 ```
 
 - EachBeginCallback<T> 为一次循环回调闭包，只在循环开始时执行一次（可选）
@@ -36,6 +39,7 @@ typedef EachOverCallback = dynamic Function(dynamic obj);
 - EachJudgeCallback<T> 为判断循环终止回调闭包，当返回 false 时循环终止
 - EachChangeCallback<T> 为末尾循环体回调闭包，每次循环体最后执行
 - EachOverCallback 处理循环结果闭包回调，一般在循环执行完成后调用
+- EachOverAsCallback<T> 处理循环结果闭包回调，一般在循环执行完成后调用，在处理的同时会将结果进行转型
 
 
 以 for 循环为例（仅仅为参考样例）
@@ -158,7 +162,7 @@ loop3() {
 ```dart
 EachResult then(EachOverCallback overCallback); // 追加处理结果回调
 
-dynamic finish(EachOverCallback overCallback); // 执行一次处理结果回调后返回结果
+T as<T>(EachOverAsCallback<T> overCallback); // 执行一次处理结果回调后返回有具体类型的结果
 
 dynamic end(); // 返回结果
 ```
@@ -233,7 +237,9 @@ loop5() {
 149
 ```
 
-如果可以明确最后一个处理回调，建议使用 finish 方法
+如果可以明确最后一个处理回调，建议使用 as 方法
+
+需要注意的是此方法不能返回 EachResult 类型对象
 
 ```dart
 loop6() {
@@ -244,29 +250,29 @@ loop6() {
 		.call((position) => position)
 		.loop() // 返回 EachResult
 		.then((list) {
-			var sum = 0;
-			list.forEach((num) {
-				sum += num;
-			});
-			return sum;
-		})
-		.then((sum){
-			return sum * 10;
-		})
-		.then((sum) {
-			return sum + 50;
-		})
-		.finish((sum){
-			return EachResult(sum - 1);
-		});
-	print(value);
+            var sum = 0;
+            list.forEach((num) {
+                sum += num;
+            });
+            return sum;
+        })
+        .then((sum){
+            return sum * 10;
+        })
+        .then((sum) {
+            return sum + 50;
+        })
+        .as((sum){
+            return sum - 1;
+        });
+	print("value type: ${value.runtimeType}, value: $value");
 }
 ```
 
 执行结果为:
 
 ```text
-149
+value type: int, value: 149
 ```
 
 #### 简化整数迭代器
@@ -277,20 +283,21 @@ loop6() {
 ```dart
 
 /// 整数循环函数，返回循环结果
-dynamic intEach(EachCallback<int> callback,{
+dynamic intEach({
 		int start = 0,
 		int end = 0,
 		int total = 0,
+		EachCallback<int> callback,
 		EachChangeCallback<int> changeCallback
 	});
 
 
-/// 整数循环函数构造器，返回值为 EachBuilder，尚未执行迭代，需要手动执行
-EachBuilder<int> intEachBuilder(
-	EachCallback<int> callback,{
+/// 整数循环函数构造器，返回值为 EachResult，可以自行增加处理回调结果
+EachResult intEachResult({
 		int start = 0,
 		int end = 0,
 		int total = 0,
+		EachCallback<int> callback,
 		EachChangeCallback<int> changeCallback
 	});
 ```
@@ -308,7 +315,8 @@ EachBuilder<int> intEachBuilder(
 ```dart
 loop7() {
 	var i = 0;
-	intEach((position) {
+	intEach(
+		callback: (position) {
 		//do something
 		i += position;
 	}, total: 100);
@@ -323,7 +331,8 @@ loop7() {
 ```dart
 loop8() {
 	var i = 0;
-	intEach((position) {
+	intEach(
+		callback: (position) {
 		//do something
 		i += position;
 	}, start: 0, end: 100);
@@ -349,7 +358,8 @@ loop8() {
 
 ```dart
 loop9() {
-	intEach((position) {
+	intEach(
+		callback: (position) {
 		//do something
 		print("curPosition: $position");
 	}, total: 100, changeCallback: (position) => position == 0 ? 1 : position * 3);
@@ -384,7 +394,9 @@ curPosition: 81
 
 loop10() {
 	var i = 0;
-	var j = intEach((position) {
+	var j = 
+	intEach(
+		callback: (position) {
 		if(position > 50)
 			return EachResult(i);
 		i += position;
@@ -408,7 +420,9 @@ i: 1275, j: 1275
 
 ```dart
 loop11() {
-	var list = intEach((position) {
+	var list = 
+	intEach(
+		callback: (position) {
 		return position * 10;
 	}, total: 10);
 	
@@ -622,13 +636,15 @@ void example6() {
 	final loopCount = 10000;
 	
 	final duration1 = Time.measure(() {
-		intEach((position) {
+	intEach(
+		callback: (position) {
 			DateTime.parse("2019-06-04 15:05:25");
 		}, total: loopCount);
 	});
 	
 	final duration2 = Time.measure(() {
-		intEach((position) {
+	intEach(
+		callback: (position) {
 			Time.parse("2019-06-04 15:05:25", "yyyy*MM*dd*HH*mm*ss");
 		}, total: loopCount);
 	});
@@ -636,7 +652,8 @@ void example6() {
 	
 	final duration3 = Time.measure(() {
 		final method = Time.generateParseMethod("yyyy*MM*dd*HH*mm*ss");
-		intEach((position) {
+	intEach(
+		callback: (position) {
 			method("2019-06-04 15:05:25");
 		}, total: loopCount);
 	});
@@ -657,3 +674,37 @@ Time 生成解析方法解析 10000 次耗时: 0:00:00.012564
 ```
 
 从结果可见，生成解析方法比原生方法大约快 20 倍左右
+
+### 转换方法
+
+#### 转化动态对象为指定类型列表
+
+```dart
+/// 如果 needPicker 为 false 时，只有 obj 是 List<T> 类型才会返回具体值，否则一律返回 null
+/// 如果 needPicker 为 true 时，分多种情况拾取指定类型的对象
+/// 1. obj 是 Iterable 的子类，遍历迭代器，将所有指定类型的对象放入新的列表中，返回新的列表
+/// 2. obj 是指定类型对象，则将对象包装到一个新的列表中，返回新的列表
+List<T> convertTypeList<T>(dynamic obj, {bool needPicker = false});
+```
+
+示例如下:
+
+```dart
+void convert1() {
+	final list = [1, "2", 5];
+	print(convertTypeList<String>(list, needPicker: false));
+}
+
+void convert2() {
+	final list = [1, "2", 5];
+	print(convertTypeList<String>(list, needPicker: true));
+}
+```
+
+
+执行结果为:
+
+```text
+null
+[2]
+```

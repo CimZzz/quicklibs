@@ -5,6 +5,7 @@ typedef EachCallback<T> = Function(T elem);
 typedef EachJudgeCallback<T> = bool Function(T obj);
 typedef EachChangeCallback<T> = T Function(T obj);
 typedef EachOverCallback = dynamic Function(dynamic obj);
+typedef EachOverAsCallback<T> = T Function(dynamic obj);
 
 int _defaultIncrementChangeCallback(int obj) => obj + 1;
 int _defaultReduceChangeCallback(int obj) => obj - 1;
@@ -69,8 +70,14 @@ class EachResult {
 	}
 	
 	
-	dynamic finish(EachOverCallback overCallback) {
-		return then(overCallback).end();
+	T as<T>(EachOverAsCallback<T> overCallback) {
+		if(isEnd)
+			return this._value is T ? this._value : null;
+		isEnd = true;
+		final newValue = overCallback(this._value);
+		assert(newValue is! EachResult);
+		this._value = newValue;
+		return newValue;
 	}
 	
 	
@@ -170,35 +177,35 @@ class EachBuilder<T> {
 	}
 }
 
-/// 整数循环函数
-/// 快捷生成整数循环函数的方法
-/// 通过 [intEachBuilder] 生成整数循环构造器，通过构造器执行循环获得返回值
-dynamic intEach(
-	EachCallback<int> callback,{
+/// 快捷生成整数循环迭代器的方法，返回最终结果
+/// 通过 [intEachBuilder] 生成整数循环构造器，通过返回的 EachResult 获得返回值
+dynamic intEach({
 		int start = 0,
 		int end = 0,
 		int total = 0,
+		EachCallback<int> callback,
 		EachChangeCallback<int> changeCallback
 	}) {
-	final builder = intEachBuilder(callback,
+	final result = intEachResult(
 		start: start,
 		end: end,
 		total: total,
+		callback: callback,
 		changeCallback: changeCallback
 	);
 	
-	if(builder == null)
+	if(result == null)
 		return null;
 	
-	return builder.loopForResult();
+	return result.end();
 }
 
-/// 整数循环函数构造器
-EachBuilder<int> intEachBuilder(
-	EachCallback<int> callback,{
+/// 快捷生成整数循环迭代器的方法，返回 EachResult
+EachResult intEachResult({
 		int start = 0,
 		int end = 0,
 		int total = 0,
+		EachCallback<int> callback,
 		EachChangeCallback<int> changeCallback
 	}) {
 	if(total == 0) {
@@ -226,8 +233,39 @@ EachBuilder<int> intEachBuilder(
 		.configAll(
 		beginCallback: () => startIdx,
 		changeCallback: _changeCallback,
-		judgeCallback: (int current) => _isAdd ? current <= endIdx : current >= endIdx,
+		judgeCallback: (int current) => _isAdd ? current < endIdx : current > endIdx,
 		callback: callback,
-	);
+	).loop();
 }
 
+
+
+/// 快捷生成列表循环迭代器的方法，返回最终结果
+/// 通过 [listEachResult] 生成整数循环构造器，通过返回的 EachResult 获得返回值
+dynamic listEach<T>(List<T> list,{
+	EachCallback<T> callback
+}) {
+	final result = listEachResult(list, callback: callback);
+	
+	if(result == null)
+		return null;
+	
+	return result.end();
+}
+
+/// 快捷生成列表循环迭代器的方法，返回 EachResult
+EachResult listEachResult<T>(List<T> list,{
+	EachCallback<T> callback
+}) {
+	if(list == null)
+		return null;
+	
+	int count = list.length;
+	
+	return intEachResult(
+		total: count,
+		callback: (position) {
+			return callback(list[position]);
+		}
+	);
+}

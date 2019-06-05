@@ -1,7 +1,6 @@
 import 'package:quicklibs/quicklibs.dart';
 
 void main() {
-	example6();
 }
 
 void example1() {
@@ -34,13 +33,16 @@ void example6() {
 	final loopCount = 10000;
 	
 	final duration1 = Time.measure(() {
-		intEach((position) {
-			DateTime.parse("2019-06-04 15:05:25");
-		}, total: loopCount);
+		intEach(
+			callback: (position) {
+				DateTime.parse("2019-06-04 15:05:25");
+			},
+			total: loopCount);
 	});
 	
 	final duration2 = Time.measure(() {
-		intEach((position) {
+		intEach(
+			callback: (position) {
 			Time.parse("2019-06-04 15:05:25", "yyyy*MM*dd*HH*mm*ss");
 		}, total: loopCount);
 	});
@@ -48,7 +50,8 @@ void example6() {
 	
 	final duration3 = Time.measure(() {
 		final method = Time.generateParseMethod("yyyy*MM*dd*HH*mm*ss");
-		intEach((position) {
+		intEach(
+			callback: (position) {
 			method("2019-06-04 15:05:25");
 		}, total: loopCount);
 	});
