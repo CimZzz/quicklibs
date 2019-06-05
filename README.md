@@ -5,12 +5,12 @@ Created from templates made available by Stagehand under a BSD-style
 
 ## 开始使用
 
-当前最新版本为: 1.0.5
+当前最新版本为: 1.0.6
 
 在 "pubspec.yaml" 文件中加入
 ```yaml
 dependencies:
-  quicklibs: ^1.0.5
+  quicklibs: ^1.0.6
 ```
 
 
