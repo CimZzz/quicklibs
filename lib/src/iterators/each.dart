@@ -174,8 +174,8 @@ class EachBuilder<T> {
 		else return EachResult(value);
 	}
 	
-	dynamic loopForResult() {
-		return loop().end();
+	E loopForResult<E>() {
+		return loop().as((result) => result is E ? result : null);
 	}
 	
 	List<E> loopForList<E>() {
@@ -197,8 +197,8 @@ class EachBuilder<T> {
 }
 
 /// 快捷生成整数循环迭代器的方法，返回最终结果
-/// 通过 [intEachBuilder] 生成整数循环构造器，通过返回的 EachResult 获得返回值
-dynamic intEach({
+/// 通过 [intEachBuilder] 生成整数循环构造器，通过返回的 EachBuilder<int> 获得返回值
+E intEach<E>({
 		int start = 0,
 		int end = 0,
 		int total = 0,
@@ -216,10 +216,33 @@ dynamic intEach({
 	if(result == null)
 		return null;
 	
-	return result.loopForResult();
+	return result.loopForResult<E>();
 }
 
-/// 快捷生成整数循环迭代器的方法，返回 EachBuilder
+/// 快捷生成整数循环迭代器的方法，返回最终 List 结果
+/// 通过 [intEachBuilder] 生成整数循环构造器，通过返回的 EachBuilder<int> 获得返回 List 值
+List<E> intEachList<E>({
+	int start = 0,
+	int end = 0,
+	int total = 0,
+	EachCallback<int> callback,
+	EachChangeCallback<int> changeCallback
+	}) {
+	final result = intEachBuilder(
+		start: start,
+		end: end,
+		total: total,
+		callback: callback,
+		changeCallback: changeCallback
+	);
+	
+	if(result == null)
+		return null;
+	
+	return result.loopForList<E>();
+}
+
+/// 快捷生成整数循环迭代器的方法，返回 EachBuilder<int>
 EachBuilder<int> intEachBuilder({
 		int start = 0,
 		int end = 0,
@@ -260,7 +283,7 @@ EachBuilder<int> intEachBuilder({
 
 
 /// 快捷生成列表循环迭代器的方法，返回最终结果
-/// 通过 [listEachBuilder] 生成整数循环构造器，通过返回的 EachResult 获得返回值
+/// 通过 [listEachBuilder] 生成整数循环构造器，通过返回的 EachBuilder 获得返回值
 dynamic listEach<T>(List<T> list,{
 	EachCallback<T> callback
 }) {
@@ -272,7 +295,7 @@ dynamic listEach<T>(List<T> list,{
 	return result.loopForResult();
 }
 
-/// 快捷生成列表循环迭代器的方法，返回 EachResult
+/// 快捷生成列表循环迭代器的方法，返回 EachBuilder
 EachBuilder<int> listEachBuilder<T>(List<T> list,{
 	EachCallback<T> callback
 }) {

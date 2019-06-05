@@ -5,12 +5,17 @@ Created from templates made available by Stagehand under a BSD-style
 
 ## 开始使用
 
-当前最新版本为: 1.0.7
+当前最新版本为: 1.0.8
 
 在 "pubspec.yaml" 文件中加入
 ```yaml
 dependencies:
-  quicklibs: ^1.0.7
+  quicklibs: ^1.0.8
+```
+
+github
+```text
+https://github.com/CimZzz/quicklibs
 ```
 
 
@@ -82,7 +87,7 @@ void loopOnly(); // 只执行循环不考虑结果
 
 EachResult loop(); // 执行循环返回结果 EachResult
 
-dynamic loopForResult(); // 执行循环直接获取最终结果
+E loopForResult<E>(); // 执行循环直接获取最终结果
 
 List<E> loopForList<E>(); // 执行循环直接获取最终指定类型列表
 
@@ -309,6 +314,15 @@ dynamic intEach({
 		EachChangeCallback<int> changeCallback
 	});
 
+/// 快捷生成整数循环迭代器的方法，返回最终 List 结果
+/// 通过 [intEachBuilder] 生成整数循环构造器，通过返回的 EachBuilder<int> 获得返回 List 值
+List<E> intEachList<E>({
+	int start = 0,
+	int end = 0,
+	int total = 0,
+	EachCallback<int> callback,
+	EachChangeCallback<int> changeCallback
+	});
 
 /// 快捷生成整数循环迭代器的方法，返回 EachBuilder<int>
 EachBuilder<int> intEachBuilder({
