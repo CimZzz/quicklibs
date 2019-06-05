@@ -1,6 +1,7 @@
 import 'package:quicklibs/quicklibs.dart';
 
 void main() {
+	loop14();
 }
 
 
@@ -160,4 +161,35 @@ loop11() {
 			return position * 10;
 		}, total: 10);
 	print(list);
+}
+
+loop12() {
+	final list = EachBuilder<int>()
+		.begin(() => 0)
+		.judge((position) => position < 5)
+		.change((position) => position + 1)
+		.call((position) => position)
+		.loopForList<int>();
+	
+	print(list);
+}
+
+loop13() {
+	listEach([1, 2, 3, 4, 5],
+	callback: (item) {
+		print(item);
+	});
+}
+
+loop14() {
+	var list = ["1", "2", "3", "4", "5"];
+	var newList = listEachBuilder(
+		list,
+		callback: (item) {
+			return item;
+		}
+	).loopForList<int>();
+	
+	print("list type: ${list.runtimeType}, $list");
+	print("newList type: ${newList.runtimeType}, $newList");
 }

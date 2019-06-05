@@ -5,12 +5,12 @@ Created from templates made available by Stagehand under a BSD-style
 
 ## 开始使用
 
-当前最新版本为: 1.0.6
+当前最新版本为: 1.0.7
 
 在 "pubspec.yaml" 文件中加入
 ```yaml
 dependencies:
-  quicklibs: ^1.0.6
+  quicklibs: ^1.0.7
 ```
 
 
@@ -84,6 +84,8 @@ EachResult loop(); // 执行循环返回结果 EachResult
 
 dynamic loopForResult(); // 执行循环直接获取最终结果
 
+List<E> loopForList<E>(); // 执行循环直接获取最终指定类型列表
+
 ```
 
 loopOnly 例子如下:
@@ -146,6 +148,21 @@ loop3() {
 		.change((position) => position + 1)
 		.call((position) => position)
 		.loopForResult();
+	
+	print(list);
+}
+```
+
+同样，loopForList 也能实现同样功能，并且会返回一个明确类型的列表而不是 dynamic 类型的列表
+
+```dart
+loop12() {
+	final list = EachBuilder<int>()
+		.begin(() => 0)
+		.judge((position) => position < 5)
+		.change((position) => position + 1)
+		.call((position) => position)
+		.loopForList<int>();
 	
 	print(list);
 }
@@ -282,7 +299,8 @@ value type: int, value: 149
 
 ```dart
 
-/// 整数循环函数，返回循环结果
+/// 快捷生成整数循环迭代器的方法，返回最终结果
+/// 通过 [intEachBuilder] 生成整数循环构造器，通过返回的 EachBuilder<int> 获得返回值
 dynamic intEach({
 		int start = 0,
 		int end = 0,
@@ -292,8 +310,8 @@ dynamic intEach({
 	});
 
 
-/// 整数循环函数构造器，返回值为 EachResult，可以自行增加处理回调结果
-EachResult intEachResult({
+/// 快捷生成整数循环迭代器的方法，返回 EachBuilder<int>
+EachBuilder<int> intEachBuilder({
 		int start = 0,
 		int end = 0,
 		int total = 0,
@@ -379,6 +397,68 @@ curPosition: 81
 
 注意: changeCallback 增长方向要与实际方向一致，否则循环不会执行
 
+#### 简化列表迭代器
+
+有些时候原生的 list-for-each 方式并不能满足我们的需求，
+我们提供了简化的列表迭代器
+
+```dart
+/// 快捷生成列表循环迭代器的方法，返回最终结果
+/// 通过 [listEachBuilder] 生成整数循环构造器，通过返回的 EachBuilder<int> 获得返回值
+dynamic listEach<T>(List<T> list,{
+	EachCallback<T> callback
+});
+
+/// 快捷生成列表循环迭代器的方法，返回 EachBuilder<int>
+EachBuilder<int> listEachBuilder<T>(List<T> list,{
+	EachCallback<T> callback
+});
+```
+
+下面演示一个简单的列表遍历
+```dart
+loop13() {
+	listEach([1, 2, 3, 4, 5],
+	callback: (item) {
+		print(item);
+	});
+}
+```
+
+执行结果如下:
+```text
+1
+2
+3
+4
+5
+```
+
+我们可以利用 EachBuilder 的特性，来完成列表一些特殊操作，如下
+
+```dart
+loop14() {
+	var list = ["1", "2", "3", "4", "5"];
+	var newList = listEachBuilder(
+		list,
+		callback: (item) {
+			return int.parse(item);
+		}
+	).loopForList<int>();
+	
+	print("list type: ${list.runtimeType}, $list");
+	print("newList type: ${newList.runtimeType}, $newList");
+}
+```
+
+执行结果如下:
+
+```text
+list type: List<String>, [1, 2, 3, 4, 5]
+newList type: List<int>, [1, 2, 3, 4, 5]
+```
+
+注意: 前提是在 callback 回调中返回对应的类型，否则会自动筛选列表，将满足指定类型的元素重新组成一个新的列表
 
 #### 中断循环
 
