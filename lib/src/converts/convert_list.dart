@@ -1,5 +1,3 @@
-
-
 /// 将对象转换为具体类型列表
 /// 如果 needPicker 为 false 时，只有 obj 是 List<T> 类型才会返回具体值，否则一律返回 null
 /// 如果 needPicker 为 true 时，分多种情况拾取指定类型的对象
