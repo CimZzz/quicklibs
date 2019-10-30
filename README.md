@@ -5,20 +5,18 @@ Created from templates made available by Stagehand under a BSD-style
 
 ## 开始使用
 
-当前最新版本为: 1.0.8
+当前最新版本为: 1.0.9
 
 在 "pubspec.yaml" 文件中加入
 ```yaml
 dependencies:
-  quicklibs: ^1.0.8
+  quicklibs: ^1.0.9
 ```
 
 github
 ```text
 https://github.com/CimZzz/quicklibs
 ```
-
-
 
 
 ## Usage
@@ -28,6 +26,8 @@ https://github.com/CimZzz/quicklibs
 - [Time](#time): 提供一系列关于时间的操作，如时间格式化，字符串转时间等方法
 
 - [转换方法](#转换方法): 提供一系列关于转换具体类型的操作
+
+- [Scope](#scope): 提供在限定的作用域内，有状态无状态消息之间的交互。 
 
 ### 迭代器
 
@@ -532,8 +532,6 @@ loop11() {
 [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
 ```
 
-
-
 ### Time
 
 提供了一系列关于操作时间的方法，通过 Time 类来访问其中方法
@@ -804,3 +802,72 @@ void convert2() {
 null
 [2]
 ```
+
+### Scope
+
+抽象了一个拥有状态的作用域:
+
+1. Activated (启用状态)
+2. Deactivated (禁用状态)
+3. Destroy (销毁状态)
+
+闭包命名
+
+```dart
+typedef ScopeMessageCallback = Future Function(dynamic obj);
+typedef ScopeActiveDelayMessageCallback = void Function(Map<dynamic, dynamic>);
+typedef ScopeBroadcastReceiver = Function(dynamic obj);
+typedef ScopeProxyRunnable<T> = Future<T> Function();
+```
+
+#### 主要使用用例
+
+![img](mdsrc/scope-relation.jpeg)
+
+#### 可使用接口描述
+```dart
+/// 激活指定 Scope
+static activate(Scope scope);
+/// 关闭指定 Scope
+static deactivate(Scope scope);
+/// 销毁指定 Scope
+static destroy(Scope scope);
+/// 将指定 Scope 作为自己子 Scope
+T fork<T extends Scope>(T scope);
+/// 将调用的 Scope 与上级 Scope 断开
+void dropSelf();
+/// 将调用的 Scope 与全部子 Scope 断开
+void dropChildren();
+/// 注册消息接收器
+/// 默认在关闭状态也可以接收
+void registerMessageCallback(dynamic key, ScopeMessageCallback callback);
+/// 注册消息接收器
+/// 可以指定在何种状态下可以接收
+void registerStatusMessageCallback(dynamic key, ScopeStatus allowRunStatus, ScopeMessageCallback callback);
+/// 注销消息接收器
+void unregisterMessageCallback(dynamic key);
+/// 向下分发一次性消息，在消息第一次被接收后停止分发
+/// 该方法可以返回处理后的结果
+Future dispatchOneTimeMessage(dynamic key, dynamic data, {bool allowTraceBack = false}) async;
+/// 向下分发消息，会触发相同 key 值下全部的接收器
+Future dispatchMessage(dynamic key, dynamic data) async;
+/// 注册活动延迟消息回调
+/// 只可注册一次
+void registerActiveDelayCallback(ScopeActiveDelayMessageCallback callback);
+/// 发送活动延迟消息
+void postActiveDelayMessage(dynamic key, dynamic data);
+/// 重置活动延迟消息相关资源
+void resetActiveDelay();
+/// 发送广播给对应 key 下注册的全部广播接收器
+static void broadcast(dynamic key, dynamic data) async;
+/// 注册广播接收器
+void registerBroadcast(dynamic key, ScopeBroadcastReceiver receiver);
+/// 注销广播接收器
+/// 如果指定广播接收器的话，则只注销指定的广播接收器，否则会将指定 key 值下全部的广播接收器全部注销
+void unregisterBroadcast(dynamic key, {ScopeBroadcastReceiver receiver});
+/// 代理执行 Future
+/// 当 Scope 状态为销毁状态时不会指定并返回 null
+Future<T> proxy<T>(ScopeProxyRunnable<T> runnable) async;
+```
+
+详细见[使用样例](example/scope/scope.dart)

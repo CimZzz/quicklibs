@@ -7,4 +7,4 @@ export 'src/time/time.dart';
 export 'src/iterators/each.dart';
 export 'src/converts/convert_list.dart';
 /// 开发中
-export 'src/scopes/scopes.dart';
+export 'src/scopes/scope.dart';

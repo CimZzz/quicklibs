@@ -20,8 +20,8 @@ typedef ScopeMessageCallback = Future Function(dynamic obj);
 
 /// 域消息回调包装器
 /// 用来检查消息回调的运行权限
-class _ScopeCallbackWrap {
-    _ScopeCallbackWrap(this.allowStatus, this.callback);
+class _ScopeMessageCallbackWrap {
+    _ScopeMessageCallbackWrap(this.allowStatus, this.callback);
 
     final ScopeStatus allowStatus;
     final ScopeMessageCallback callback;
@@ -33,6 +33,8 @@ typedef ScopeActiveDelayMessageCallback = void Function(Map<dynamic, dynamic>);
 
 /// 广播接收器回调
 typedef ScopeBroadcastReceiver = Function(dynamic obj);
+
+typedef ScopeProxyRunnable<T> = Future<T> Function();
 
 /// Scope 基类
 /// 作用域 基类
@@ -63,7 +65,8 @@ abstract class Scope {
     /// 由全局方法调用私有方法的目的是为了确保方法在被继承的过程中
     /// 不被篡改
     static activate(Scope scope) {
-        scope._activate();
+        if(scope != rootScope)
+            scope._activate();
     }
 
     /// 实际启用 Scope 的逻辑
@@ -86,7 +89,8 @@ abstract class Scope {
     /// 由全局方法调用私有方法的目的是为了确保方法在被继承的过程中
     /// 不被篡改
     static deactivate(Scope scope) {
-        scope._deactivate();
+        if(scope != rootScope)
+            scope._deactivate();
     }
 
     /// 实际停用 Scope 的逻辑
@@ -108,14 +112,15 @@ abstract class Scope {
     /// 由全局方法调用私有方法的目的是为了确保方法在被继承的过程中
     /// 不被篡改
     static destroy(Scope scope) {
-        scope._destroy();
+        if(scope != rootScope)
+            scope._destroy();
     }
 
     /// 实际销毁 Scope 的逻辑
     void _destroy() {
         if(this._scopeStatus == ScopeStatus.destroy)
             return;
-        this._scopeStatus == ScopeStatus.destroy;
+        this._scopeStatus = ScopeStatus.destroy;
 
         ///
         /// 这里涉及一些处理逻辑
@@ -134,6 +139,7 @@ abstract class Scope {
     //
 
     /// 上级 Scope
+    /// 目前上级 Scope 只在向上回溯时起到作用
     Scope _parent;
 
     /// 子项 Scope 列表
@@ -142,7 +148,6 @@ abstract class Scope {
     /// 将参数中的 Scope 作为当前 Scope 的子域
     T fork<T extends Scope>(T scope) {
         assert(scope != null);
-        assert(scope._parent == null);
         assert(scope._scopeStatus != ScopeStatus.destroy);
         assert(_scopeStatus != ScopeStatus.destroy);
         if(scope == null)
@@ -151,6 +156,7 @@ abstract class Scope {
             return null;
         if(_scopeStatus == ScopeStatus.destroy)
             return null;
+        scope.dropSelf();
         this._children ??= <Scope>[];
         this._children.add(scope);
         scope._parent = this;
@@ -183,19 +189,37 @@ abstract class Scope {
 
     /// 消息回调路由表
     /// 存放全部关于消息的回调
-    Map<dynamic, _ScopeCallbackWrap> _callbackMap;
+    Map<dynamic, _ScopeMessageCallbackWrap> _callbackMap;
+
 
     /// 注册消息回调路由
-    void registerMessageCallback(dynamic key, ScopeMessageCallback callback, {ScopeStatus allowRunStatus = ScopeStatus.activated}) {
+    /// 状态权限默认为 [ScopeStatus.deactivated]
+    void registerMessageCallback(dynamic key, ScopeMessageCallback callback) {
+        registerStatusMessageCallback(key, ScopeStatus.deactivated, callback);
+    }
+
+    /// 注册消息回调路由
+    void registerStatusMessageCallback(dynamic key, ScopeStatus allowRunStatus, ScopeMessageCallback callback) {
+        assert(allowRunStatus != ScopeStatus.destroy);
         if(_scopeStatus == ScopeStatus.destroy)
             return;
 
-        this._callbackMap ??= <dynamic, _ScopeCallbackWrap>{};
-        this._callbackMap[key] = _ScopeCallbackWrap(
+        this._callbackMap ??= <dynamic, _ScopeMessageCallbackWrap>{};
+        this._callbackMap[key] = _ScopeMessageCallbackWrap(
             allowRunStatus,
             callback
         );
     }
+
+    /// 注销消息回调路由
+    void unregisterMessageCallback(dynamic key) {
+        if(_scopeStatus == ScopeStatus.destroy)
+            return;
+
+        if(this._callbackMap != null)
+            this._callbackMap.remove(key);
+    }
+
 
     /// 分发一次性消息，并且获取处理结果
     /// 当找到可以处理对应消息的消息回调时，将会中断遍历立即返回执行结果（Future）
@@ -246,11 +270,11 @@ abstract class Scope {
 
     /// 向下分发消息
     /// 由该 Scope 向自己及其子域分发消息
-    void dispatchMessage(dynamic key, dynamic data) async {
+    Future dispatchMessage(dynamic key, dynamic data) async {
         if(_scopeStatus == ScopeStatus.destroy)
             return;
 
-        await _dispatchMessage(key, data);
+        return _dispatchMessage(key, data);
     }
 
     /// 实际向下分发消息的逻辑
@@ -269,7 +293,7 @@ abstract class Scope {
 
     /// 根据给定的键值找到对应的消息回调
     /// 本方法被标记为 "async" 的原因是为了不阻塞当前执行
-    Future<_ScopeCallbackWrap> _getCallbackByKey(dynamic key) async {
+    Future<_ScopeMessageCallbackWrap> _getCallbackByKey(dynamic key) async {
         final map = this._callbackMap;
         if(map == null)
             return null;
@@ -279,10 +303,10 @@ abstract class Scope {
 
     /// 调用消息回调方法。
     /// 根据当前 Scope 的状态决定是否执行回调
-    Future _invokeScopeMessageCallback(dynamic data, _ScopeCallbackWrap callback) {
+    Future _invokeScopeMessageCallback(dynamic data, _ScopeMessageCallbackWrap callback) {
         // 如果消息回调允许的执行状态小于回调载体，表示当前状态不允许调用该消息回调
         // 直接返回 null
-        if(callback.allowStatus.index <= currentStatus.index)
+        if(callback.allowStatus.index < currentStatus.index)
             return null;
         return callback.callback(data);
     }
@@ -301,7 +325,7 @@ abstract class Scope {
     /// 活动延迟消息维持表
     ///
     /// 在 [ScopeStatus.deactivated] 状态下的活动延迟消息都会被收集到这个表中
-    Map<dynamic, dynamic> _activeDelayMap = <dynamic, dynamic>{};
+    Map<dynamic, dynamic> _activeDelayMap;
 
     /// 用来判断当前是否正在处理活动延迟消息
     bool _flushingActiveDelayMessage = false;
@@ -324,17 +348,20 @@ abstract class Scope {
     /// 只有在 [ScopeStatus.activated] 状态下才可调用
     void _flushActiveDelayMessage() async {
         assert(_scopeStatus == ScopeStatus.activated);
-        if(_activeDelayCallback != null) {
+        if(_flushingActiveDelayMessage)
+            return;
+        if(_activeDelayCallback != null && _activeDelayMap != null) {
             _flushingActiveDelayMessage = true;
-            final copiesMap = Map.from(_activeDelayMap);
-            _activeDelayMap.clear();
+            final copiesMap = _activeDelayMap;
+            _activeDelayMap = null;
             _activeDelayCallback(copiesMap);
             _flushingActiveDelayMessage = false;
             // 如果在处理的过程中，又有新的活动延迟消息的话，
             // 会在下一次执行过程中去处理
-            if(_activeDelayMap.isNotEmpty) {
+            if(_activeDelayMap != null) {
                 await null;
-                _flushActiveDelayMessage();
+                if(_scopeStatus == ScopeStatus.activated)
+                    _flushActiveDelayMessage();
             }
         }
     }
@@ -342,11 +369,12 @@ abstract class Scope {
     /// 发送活动延迟消息
     void postActiveDelayMessage(dynamic key, dynamic data) {
         if(_scopeStatus == ScopeStatus.destroy)
-            return
+            return;
 
+        _activeDelayMap ??= <dynamic, dynamic>{};
         _activeDelayMap[key] = data;
 
-        if(!_flushingActiveDelayMessage && _scopeStatus == ScopeStatus.activated)
+        if(_scopeStatus == ScopeStatus.activated)
             _flushActiveDelayMessage();
     }
 
@@ -356,7 +384,7 @@ abstract class Scope {
             return;
 
         _flushingActiveDelayMessage = false;
-        _activeDelayMap.clear();
+        _activeDelayMap = null;
     }
 
     /// 销毁活动延迟消息相关资源
@@ -514,6 +542,24 @@ abstract class Scope {
     }
 
     //
+    // 监管 Future（重要）
+    //
+    //
+
+    /// 代理执行 Future
+    /// 当 Scope 状态为销毁状态时返回 null
+    Future<T> proxy<T>(ScopeProxyRunnable<T> runnable) async {
+        if(_scopeStatus == ScopeStatus.destroy)
+            return null;
+        var future = runnable();
+        final result = await future;
+        if(_scopeStatus == ScopeStatus.destroy)
+            return null;
+        return result;
+    }
+
+
+    //
     // 子类需要实现的方法
     //
     //
@@ -535,7 +581,7 @@ abstract class Scope {
 class _RootScope extends Scope {
     /// 根作用域永远处于激活状态
     _RootScope() {
-        Scope.activate(this);
+        _activate();
     }
 
     @override
