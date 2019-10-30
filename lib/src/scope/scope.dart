@@ -65,15 +65,17 @@ abstract class Scope {
     /// 由全局方法调用私有方法的目的是为了确保方法在被继承的过程中
     /// 不被篡改
     static activate(Scope scope) {
-        if(scope != rootScope)
+        if(scope != rootScope) {
             scope._activate();
+        }
     }
 
     /// 实际启用 Scope 的逻辑
     void _activate() {
         assert(this._scopeStatus != ScopeStatus.destroy);
-        if(this._scopeStatus == ScopeStatus.destroy)
+        if(this._scopeStatus == ScopeStatus.destroy) {
             return;
+        }
         this._scopeStatus = ScopeStatus.activated;
 
         ///
@@ -89,8 +91,9 @@ abstract class Scope {
     /// 由全局方法调用私有方法的目的是为了确保方法在被继承的过程中
     /// 不被篡改
     static deactivate(Scope scope) {
-        if(scope != rootScope)
+        if(scope != rootScope) {
             scope._deactivate();
+        }
     }
 
     /// 实际停用 Scope 的逻辑
