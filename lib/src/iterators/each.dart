@@ -10,40 +10,35 @@ typedef EachOverAsCallback<T> = T Function(dynamic obj);
 int _defaultIncrementChangeCallback(int obj) => obj + 1;
 int _defaultReduceChangeCallback(int obj) => obj - 1;
 
-
 /// 基础循环逻辑函数
 /// beginCallback 为一次循环回调闭包，只在循环开始时执行一次（可选）
 /// changeCallback 为末尾循环体回调闭包，每次循环体最后执行
 /// judgeCallback 为判断循环终止回调闭包，当返回 false 时循环终止
 /// callback 为循环体回调闭包，每次循环均会执行（可选）
 /// isNonValue 为无返回值开关，默认每次循环无返回值，当出现返回值时中断循环
-dynamic _each<T, E>({
-	EachBeginCallback<T> beginCallback,
-	EachChangeCallback<T> changeCallback,
-	EachJudgeCallback<T> judgeCallback,
-	EachCallback<T> callback,
-	bool isNonValue = false
-}) {
+dynamic _each<T, E>(
+		{EachBeginCallback<T> beginCallback,
+			EachChangeCallback<T> changeCallback,
+			EachJudgeCallback<T> judgeCallback,
+			EachCallback<T> callback,
+			bool isNonValue = false}) {
 	List<E> list;
 	T obj = beginCallback != null ? beginCallback() : null;
-	while(judgeCallback(obj)) {
-		if(!isNonValue) {
+	while (judgeCallback(obj)) {
+		if (!isNonValue) {
 			final val = callback != null ? callback(obj) : callback;
 			if (val != null) {
 				if (val is EachResult) {
 					return val;
-				}
-				else {
-					if(val is E) {
+				} else {
+					if (val is E) {
 						list ??= List();
 						list.add(val);
 					}
 				}
 			}
-		}
-		else if(callback != null) {
-			if(callback(obj) != null)
-				return null;
+		} else if (callback != null && callback(obj) != null) {
+			return null;
 		}
 		obj = changeCallback(obj);
 	}
@@ -54,35 +49,36 @@ dynamic _each<T, E>({
 /// 如果在循环中返回的是此类，则直接终止循环
 /// 如果在此类内部执行 then 函数时返回此类，则会忽略后续全部 then 函数
 class EachResult {
-	EachResult(dynamic value): this._value = value;
+	EachResult(dynamic value) : this._value = value;
 	dynamic _value;
 	bool isEnd = false;
-	
+
 	EachResult then(EachOverCallback overCallback) {
-		if(isEnd)
+		if (isEnd) {
 			return this;
+		}
 		assert(overCallback != null);
 		final newValue = overCallback(this._value);
-		if(newValue is EachResult) {
+		if (newValue is EachResult) {
 			isEnd = true;
 			this._value = newValue._value;
+		} else {
+			this._value = newValue;
 		}
-		else this._value = newValue;
 		return this;
 	}
-	
-	
+
 	T as<T>(EachOverAsCallback<T> overCallback) {
-		if(isEnd)
+		if (isEnd) {
 			return this._value is T ? this._value : null;
+		}
 		isEnd = true;
 		final newValue = overCallback(this._value);
 		assert(newValue is! EachResult);
 		this._value = newValue;
 		return newValue;
 	}
-	
-	
+
 	dynamic end() {
 		isEnd = true;
 		return this._value;
@@ -106,208 +102,204 @@ class EachBuilder<T> {
 	EachChangeCallback<T> _changeCallback;
 	EachJudgeCallback<T> _judgeCallback;
 	EachCallback<T> _callback;
-	
-	
+
 	EachBuilder<T> begin(EachBeginCallback<T> beginCallback) {
 		this._beginCallback = beginCallback;
 		return this;
 	}
-	
+
 	EachBuilder<T> change(EachChangeCallback<T> changeCallback) {
 		this._changeCallback = changeCallback;
 		return this;
 	}
-	
+
 	EachBuilder<T> judge(EachJudgeCallback<T> judgeCallback) {
 		this._judgeCallback = judgeCallback;
 		return this;
 	}
-	
+
 	EachBuilder<T> call(EachCallback<T> callback) {
 		this._callback = callback;
 		return this;
 	}
-	
-	EachBuilder<T> configAll({
-		EachBeginCallback<T> beginCallback,
-		EachChangeCallback<T> changeCallback,
-		EachJudgeCallback<T> judgeCallback,
-		EachCallback<T> callback
-	}) {
-		if(beginCallback != null)
+
+	EachBuilder<T> configAll(
+			{EachBeginCallback<T> beginCallback,
+				EachChangeCallback<T> changeCallback,
+				EachJudgeCallback<T> judgeCallback,
+				EachCallback<T> callback}) {
+		if (beginCallback != null) {
 			this._beginCallback = beginCallback;
-		if(changeCallback != null)
+		}
+		if (changeCallback != null) {
 			this._changeCallback = changeCallback;
-		if(judgeCallback != null)
+		}
+		if (judgeCallback != null) {
 			this._judgeCallback = judgeCallback;
-		if(callback != null)
+		}
+		if (callback != null) {
 			this._callback = callback;
+		}
 		return this;
 	}
-	
+
 	void loopOnly() {
 		assert(this._changeCallback != null);
 		assert(this._judgeCallback != null);
-		
+
 		_each<T, dynamic>(
-			beginCallback: this._beginCallback,
-			changeCallback: this._changeCallback,
-			judgeCallback: this._judgeCallback,
-			callback: this._callback,
-			isNonValue: true
-		);
+				beginCallback: this._beginCallback,
+				changeCallback: this._changeCallback,
+				judgeCallback: this._judgeCallback,
+				callback: this._callback,
+				isNonValue: true);
 	}
-	
+
 	EachResult loop() {
 		assert(this._changeCallback != null);
 		assert(this._judgeCallback != null);
-		
+
 		final value = _each<T, dynamic>(
-			beginCallback: this._beginCallback,
-			changeCallback: this._changeCallback,
-			judgeCallback: this._judgeCallback,
-			callback: this._callback
-		);
-		
-		if(value is EachResult)
+				beginCallback: this._beginCallback,
+				changeCallback: this._changeCallback,
+				judgeCallback: this._judgeCallback,
+				callback: this._callback);
+
+		if (value is EachResult) {
 			return value;
-		else return EachResult(value);
+		} else {
+			return EachResult(value);
+		}
 	}
-	
+
 	E loopForResult<E>() {
 		return loop().as((result) => result is E ? result : null);
 	}
-	
+
 	List<E> loopForList<E>() {
 		assert(this._changeCallback != null);
 		assert(this._judgeCallback != null);
-		
+
 		var value = _each<T, E>(
-			beginCallback: this._beginCallback,
-			changeCallback: this._changeCallback,
-			judgeCallback: this._judgeCallback,
-			callback: this._callback
-		);
-		
-		if(value is EachResult)
+				beginCallback: this._beginCallback,
+				changeCallback: this._changeCallback,
+				judgeCallback: this._judgeCallback,
+				callback: this._callback);
+
+		if (value is EachResult) {
 			value = value._value;
-		
+		}
+
 		return convertTypeList<E>(value, needPicker: true);
 	}
 }
 
 /// 快捷生成整数循环迭代器的方法，返回最终结果
 /// 通过 [intEachBuilder] 生成整数循环构造器，通过返回的 EachBuilder<int> 获得返回值
-E intEach<E>({
-		int start = 0,
-		int end = 0,
-		int total = 0,
-		EachCallback<int> callback,
-		EachChangeCallback<int> changeCallback
-	}) {
+E intEach<E>(
+		{int start = 0,
+			int end = 0,
+			int total = 0,
+			EachCallback<int> callback,
+			EachChangeCallback<int> changeCallback}) {
 	final result = intEachBuilder(
-		start: start,
-		end: end,
-		total: total,
-		callback: callback,
-		changeCallback: changeCallback
-	);
-	
-	if(result == null)
+			start: start,
+			end: end,
+			total: total,
+			callback: callback,
+			changeCallback: changeCallback);
+
+	if (result == null) {
 		return null;
-	
+	}
+
 	return result.loopForResult<E>();
 }
 
 /// 快捷生成整数循环迭代器的方法，返回最终 List 结果
 /// 通过 [intEachBuilder] 生成整数循环构造器，通过返回的 EachBuilder<int> 获得返回 List 值
-List<E> intEachList<E>({
-	int start = 0,
-	int end = 0,
-	int total = 0,
-	EachCallback<int> callback,
-	EachChangeCallback<int> changeCallback
-	}) {
+List<E> intEachList<E>(
+		{int start = 0,
+			int end = 0,
+			int total = 0,
+			EachCallback<int> callback,
+			EachChangeCallback<int> changeCallback}) {
 	final result = intEachBuilder(
-		start: start,
-		end: end,
-		total: total,
-		callback: callback,
-		changeCallback: changeCallback
-	);
-	
-	if(result == null)
+			start: start,
+			end: end,
+			total: total,
+			callback: callback,
+			changeCallback: changeCallback);
+
+	if (result == null) {
 		return null;
-	
+	}
+
 	return result.loopForList<E>();
 }
 
 /// 快捷生成整数循环迭代器的方法，返回 EachBuilder<int>
-EachBuilder<int> intEachBuilder({
-		int start = 0,
-		int end = 0,
-		int total = 0,
-		EachCallback<int> callback,
-		EachChangeCallback<int> changeCallback
-	}) {
-	if(total == 0) {
-		if(start == end)
+EachBuilder<int> intEachBuilder(
+		{int start = 0,
+			int end = 0,
+			int total = 0,
+			EachCallback<int> callback,
+			EachChangeCallback<int> changeCallback}) {
+	if (total == 0) {
+		if (start == end) {
 			return null;
+		}
 	}
-	
+
 	final startIdx = start;
 	final endIdx = total == 0 ? end : startIdx + total;
 	final _isAdd = startIdx < endIdx;
 	EachChangeCallback<int> _changeCallback;
-	if(changeCallback == null) {
-		_changeCallback = _isAdd ? _defaultIncrementChangeCallback : _defaultReduceChangeCallback;
-	}
-	else {
+	if (changeCallback == null) {
+		_changeCallback =
+		_isAdd ? _defaultIncrementChangeCallback : _defaultReduceChangeCallback;
+	} else {
 		_changeCallback = changeCallback;
 		var testNum = 1;
 		var _isTestAdd = _changeCallback(testNum) > testNum;
-		
-		if(_isAdd != _isTestAdd)
+
+		if (_isAdd != _isTestAdd) {
 			return null;
+		}
 	}
-	
-	return EachBuilder<int>()
-		.configAll(
+
+	return EachBuilder<int>().configAll(
 		beginCallback: () => startIdx,
 		changeCallback: _changeCallback,
-		judgeCallback: (int current) => _isAdd ? current < endIdx : current > endIdx,
+		judgeCallback: (int current) =>
+		_isAdd ? current < endIdx : current > endIdx,
 		callback: callback,
 	);
 }
 
-
-
 /// 快捷生成列表循环迭代器的方法，返回最终结果
 /// 通过 [listEachBuilder] 生成整数循环构造器，通过返回的 EachBuilder 获得返回值
-dynamic listEach<T>(List<T> list,{
-	EachCallback<T> callback
-}) {
+dynamic listEach<T>(List<T> list, {EachCallback<T> callback}) {
 	final result = listEachBuilder(list, callback: callback);
-	
-	if(result == null)
+
+	if (result == null) {
 		return null;
-	
+	}
+
 	return result.loopForResult();
 }
 
 /// 快捷生成列表循环迭代器的方法，返回 EachBuilder
-EachBuilder<int> listEachBuilder<T>(List<T> list,{
-	EachCallback<T> callback
-}) {
-	if(list == null)
+EachBuilder<int> listEachBuilder<T>(List<T> list, {EachCallback<T> callback}) {
+	if (list == null) {
 		return null;
-	
+	}
+
 	int count = list.length;
-	
+
 	return intEachBuilder(
-		total: count,
-		callback: (position) {
-			return callback(list[position]);
-		}
-	);
+			total: count,
+			callback: (position) {
+				return callback(list[position]);
+			});
 }

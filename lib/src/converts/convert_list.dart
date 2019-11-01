@@ -4,25 +4,27 @@
 /// 1. obj 是 Iterable 的子类，遍历迭代器，将所有指定类型的对象放入新的列表中，返回新的列表
 /// 2. obj 是指定类型对象，则将对象包装到一个新的列表中，返回新的列表
 List<T> convertTypeList<T>(dynamic obj, {bool needPicker = false}) {
-	if(obj is List<T>)
+	if (obj is List<T>) {
 		return obj;
-	else if(!needPicker)
+	} else if (!needPicker) {
 		return null;
-	
-	if(obj is Iterable) {
+	}
+
+	if (obj is Iterable) {
 		List<T> list;
 		obj.forEach((item) {
-			if(item is T) {
+			if (item is T) {
 				list ??= List<T>();
 				list.add(item);
 			}
 		});
-		
+
 		return list;
 	}
-	
-	if(obj is T)
+
+	if (obj is T) {
 		return [obj];
-	
+	}
+
 	return null;
 }
