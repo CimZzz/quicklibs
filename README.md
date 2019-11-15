@@ -1,16 +1,11 @@
-Dart 快速开发工具库
-
-Created from templates made available by Stagehand under a BSD-style
-[license](https://github.com/dart-lang/stagehand/blob/master/LICENSE).
-
 ## 开始使用
 
-当前最新版本为: 1.1.3
+当前最新版本为: 1.1.4
 
 在 "pubspec.yaml" 文件中加入
 ```yaml
 dependencies:
-  quicklibs: ^1.1.3
+  quicklibs: ^1.1.4
 ```
 
 github
@@ -817,7 +812,8 @@ null
 typedef ScopeMessageCallback = Future Function(dynamic obj);
 typedef ScopeActiveDelayMessageCallback = void Function(Map<dynamic, dynamic>);
 typedef ScopeBroadcastReceiver = Function(dynamic obj);
-typedef ScopeProxyRunnable<T> = Future<T> Function();
+typedef ScopeProxyAsyncRunnable<T> = Future<T> Function();
+typedef ScopeProxySyncRunnable<T> = Future<T> Function();
 ```
 
 #### 主要使用用例
@@ -867,7 +863,10 @@ void registerBroadcast(dynamic key, ScopeBroadcastReceiver receiver);
 void unregisterBroadcast(dynamic key, {ScopeBroadcastReceiver receiver});
 /// 代理执行 Future
 /// 当 Scope 状态为销毁状态时不会指定并返回 null
-Future<T> proxy<T>(ScopeProxyRunnable<T> runnable) async;
+Future<T> proxyAsync<T>(ScopeProxyAsyncRunnable<T> runnable) async;
+/// 代理同步执行回调
+/// 当 Scope 状态为销毁状态时返回 null
+T proxySync<T>(ScopeProxySyncRunnable<T> runnable);
 ```
 
 详细见[使用样例](example/scope/scope.dart)

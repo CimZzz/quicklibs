@@ -166,9 +166,9 @@ void example8() async {
     // 开始测试倒计时，4秒后销毁 Scope
     Future.delayed(const Duration(seconds: 4), () => Scope.destroy(scope));
 
-    String task1Result = await scope.proxy(task1);
-    String task2Result = await scope.proxy(task2);
-    String task3Result = await scope.proxy(task3);
+    String task1Result = await scope.proxyAsync(task1);
+    String task2Result = await scope.proxyAsync(task2);
+    String task3Result = await scope.proxyAsync(task3);
 
     print("task1Result -> $task1Result, task2Result -> $task2Result, task3Result -> $task3Result");
 }

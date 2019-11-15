@@ -1,7 +1,6 @@
 name: quicklibs
-description: Useful toolkits collection for Dart. Currently, This library include of `Time`、`Iterator` and `Scope`,
-  that very convenient to use. Have bean tested many times and Don't worry that it may cause some potential problems! Be happy~ :)
-version: 1.1.3
+description: Useful toolkits collection for Dart. Include of `Time`、`Iterator` and `Scope`, that very convenient to use. Be happy~ :)
+version: 1.1.4
 homepage: https://github.com/CimZzz/quicklibs
 author: wangyanxiong <a1950207@gmail.com>
 

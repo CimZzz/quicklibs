@@ -34,7 +34,11 @@ typedef ScopeActiveDelayMessageCallback = void Function(Map<dynamic, dynamic>);
 /// 广播接收器回调
 typedef ScopeBroadcastReceiver = Function(dynamic obj);
 
-typedef ScopeProxyRunnable<T> = Future<T> Function();
+/// 异步代理运行回调
+typedef ScopeProxyAsyncRunnable<T> = Future<T> Function();
+
+/// 同步代理运行回调
+typedef ScopeProxySyncRunnable<T> = T Function();
 
 /// Scope 基类
 /// 作用域 基类
@@ -581,13 +585,13 @@ abstract class Scope {
     }
 
     //
-    // 监管 Future（重要）
+    // 监管（重要）
     //
     //
 
-    /// 代理执行 Future
+    /// 代理异步执行 Future
     /// 当 Scope 状态为销毁状态时返回 null
-    Future<T> proxy<T>(ScopeProxyRunnable<T> runnable) async {
+    Future<T> proxyAsync<T>(ScopeProxyAsyncRunnable<T> runnable) async {
         if(_scopeStatus == ScopeStatus.destroy) {
             return null;
         }
@@ -597,6 +601,16 @@ abstract class Scope {
             return null;
         }
         return result;
+    }
+
+    /// 代理同步执行回调
+    /// 当 Scope 状态为销毁状态时返回 null
+    T proxySync<T>(ScopeProxySyncRunnable<T> runnable) {
+        if(_scopeStatus == ScopeStatus.destroy) {
+            return null;
+        }
+
+        return runnable();
     }
 
 
