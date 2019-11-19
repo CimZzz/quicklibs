@@ -1,11 +1,11 @@
 ## 开始使用
 
-当前最新版本为: 1.1.4
+当前最新版本为: 1.1.6
 
 在 "pubspec.yaml" 文件中加入
 ```yaml
 dependencies:
-  quicklibs: ^1.1.4
+  quicklibs: ^1.1.6
 ```
 
 github
@@ -797,6 +797,34 @@ void convert2() {
 null
 [2]
 ```
+
+#### 转换对象为指定类型
+
+```dart
+/// 转换对象为指定类型
+/// 如果对象为 null 或者对象类型不匹配则返回 null
+T castTo<T>(dynamic obj)
+``` 
+
+实例如下:
+
+```dart
+/// 转换对象
+void convert3() {
+	dynamic number = 123;
+	print(castTo<String>(number));
+	print(castTo<int>(number));
+}
+```
+
+执行结果为:
+```text
+null
+123
+```
+
+
+---
 
 ### Scope
 
