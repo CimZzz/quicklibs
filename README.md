@@ -844,9 +844,12 @@ void registerStatusMessageCallback(dynamic key, ScopeStatus allowRunStatus, Scop
 void unregisterMessageCallback(dynamic key);
 /// 向下分发一次性消息，在消息第一次被接收后停止分发
 /// 该方法可以返回处理后的结果
-Future dispatchOneTimeMessage(dynamic key, dynamic data, {bool allowTraceBack = false}) async;
+Future dispatchOneTimeMessage(dynamic key, dynamic data, {bool allowTraceBack = false, bool onlyTrackBack = false}) async;
 /// 向下分发消息，会触发相同 key 值下全部的接收器
 Future dispatchMessage(dynamic key, dynamic data) async;
+/// 向上分发消息
+/// 由该 Scope 向父级 Scope 传递消息
+Future dispatchParentMessage(dynamic key, dynamic data, { int traceCount = 1}) async;
 /// 注册活动延迟消息回调
 /// 只可注册一次
 void registerActiveDelayCallback(ScopeActiveDelayMessageCallback callback);
