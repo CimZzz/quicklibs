@@ -1,7 +1,7 @@
 import 'package:quicklibs/quicklibs.dart';
 
 void main() {
-    example10();
+    example13();
 }
 
 /// 测试样例1
@@ -204,4 +204,81 @@ void example10() async {
     print(grandchild.getStoredData("number"));
     print(child.getStoredData("number"));
     print(self.getStoredData("number"));
+}
+
+/// 测试样例11
+/// 分发同代消息
+/// 向同父 Scope 下的全部子节点分发消息
+void example11() async {
+    final child1 = GeneralScope();
+    final child2 = GeneralScope();
+    final self = Scope.rootScope;
+
+    self.fork(child1);
+    self.fork(child2);
+
+    child1.registerMessageCallback("child1_callback", (data) async {
+        print("child1: $data");
+    });
+
+    child2.registerMessageCallback("child2_callback", (data) async {
+        print("child2: $data");
+    });
+
+    self.dispatchMessage("child1_callback", "由 rootScope 分发的消息");
+    self.dispatchMessage("child2_callback", "由 rootScope 分发的消息");
+    child1.dispatchCousinMessage("child2_callback", "由 child1 分发的消息");
+}
+
+/// 测试样例12
+/// 分发一次性同代消息
+/// 向同父 Scope 下的子节点分发一次性消息
+void example12() async {
+    final child1 = GeneralScope();
+    final child2 = GeneralScope();
+    final self = Scope.rootScope;
+
+    self.fork(child1);
+    self.fork(child2);
+
+    child1.registerMessageCallback("child1_callback", (data) async {
+        return "child1_data";
+    });
+
+    child2.registerMessageCallback("child2_callback", (data) async {
+        return "child2_data: " + data;
+    });
+
+    print(await child1.dispatchCousinOneTimeMessage("child2_callback", "hello child2"));
+}
+
+/// 测试样例13
+/// 向指定 id 的 Scope分发消息
+void example13() async {
+    final child1 = GeneralScope(scopeId: "child1");
+    final child2 = GeneralScope(scopeId: "child2");
+    final grandchild1 = GeneralScope(scopeId: "grandChild1");
+    final self = Scope.rootScope;
+
+    self.fork(child1);
+    self.fork(child2);
+    child1.fork(grandchild1);
+
+
+    child1.registerMessageCallback("callback", (data) async {
+        print("child1 recv data: $data");
+    });
+
+    child2.registerMessageCallback("callback", (data) async {
+        print("child2 recv data: $data");
+    });
+
+    grandchild1.registerMessageCallback("callback", (data) async {
+        print("grandchild1 recv data: $data");
+    });
+
+    self.dispatchSpecifiedMessage("child1", "callback", "good child 1");
+    self.dispatchSpecifiedMessage("child2", "callback", "good child 2");
+    self.dispatchSpecifiedMessage("grandChild1", "callback", "hello grandChild1");
+    self.dispatchSpecifiedMessage("grandChild1", "callback", "good grandChild1", onlyAllowDirectChildren: false);
 }

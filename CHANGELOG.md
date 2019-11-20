@@ -50,3 +50,9 @@
 
 - Scope 新增存储数据方法 `StoredData`
 - Scope.rootScope 不能成为其他 Scope 的子 Scope
+
+## 1.1.8
+
+- Scope 新增分发同代消息方法
+- Scope 新增分发一次性同代消息方法
+- Scope 新增向指定 id 的 Scope 分发消息方法

@@ -1,11 +1,11 @@
 ## 开始使用
 
-当前最新版本为: 1.1.7
+当前最新版本为: 1.1.8
 
 在 "pubspec.yaml" 文件中加入
 ```yaml
 dependencies:
-  quicklibs: ^1.1.7
+  quicklibs: ^1.1.8
 ```
 
 github
@@ -878,6 +878,16 @@ Future dispatchMessage(dynamic key, dynamic data) async;
 /// 向上分发消息
 /// 由该 Scope 向父级 Scope 传递消息
 Future dispatchParentMessage(dynamic key, dynamic data, { int traceCount = 1}) async;
+/// 分发同代消息
+/// 对自己及同父 Scope 下的表兄弟分发消息
+Future dispatchCousinMessage(dynamic key, dynamic data) async
+/// 分发一次性同代消息
+/// 当找到可以处理对应消息的消息回调时，将会中断遍历立即返回执行结果（Future）
+Future dispatchCousinOneTimeMessage(dynamic key, dynamic data) async
+/// 向指定 id 的子 Scope 分发消息
+/// 如果直接子 Scope 不存在指定 id，可以设置 `onlyAllowDirectChildren = false`
+/// 进行深度遍历.
+Future dispatchSpecifiedMessage(dynamic id, dynamic key, dynamic data, { bool onlyAllowDirectChildren = true } ) async
 /// 注册活动延迟消息回调
 /// 只可注册一次
 void registerActiveDelayCallback(ScopeActiveDelayMessageCallback callback);

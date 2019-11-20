@@ -54,11 +54,15 @@ abstract class Scope {
         return _rootScope;
     }
 
-    Scope({this.scopeName});
+    Scope({this.scopeName, this.scopeId});
 
     /// Scope 名
     /// 便于调试
     final String scopeName;
+
+    /// Scope Id
+    /// 只有指定 id 的 Scope 才可以发送指定消息
+    final dynamic scopeId;
 
     //
     // 生命周期状态
@@ -161,6 +165,9 @@ abstract class Scope {
     /// 子项 Scope 列表
     List<Scope> _children;
 
+    /// 子项 Scope id 映射表
+    Map<dynamic, Scope> _scopeIdMap;
+
     /// 将参数中的 Scope 作为当前 Scope 的子域
     /// * [Scope.rootScope] 不能作为子 Scope
     T fork<T extends Scope>(T scope) {
@@ -182,6 +189,10 @@ abstract class Scope {
         scope.dropSelf();
         this._children ??= <Scope>[];
         this._children.add(scope);
+        if(scope.scopeId != null) {
+            this._scopeIdMap ??= Map();
+            this._scopeIdMap[scope.scopeId] = scope;
+        }
         scope._parent = this;
         return scope;
     }
@@ -190,6 +201,7 @@ abstract class Scope {
     void dropSelf() {
         if(_parent != null) {
             _parent._children?.remove(this);
+            _parent._scopeIdMap?.remove(this.scopeId);
             _parent = null;
         }
     }
@@ -252,7 +264,7 @@ abstract class Scope {
     /// 默认向下遍历，向上回溯需要手动配置
     /// @params allowTraceBack 表示是否需要向上回溯（只针对直接父域）
     Future dispatchOneTimeMessage(dynamic key, dynamic data, {bool allowTraceBack = false, bool onlyTraceBack = false}) async {
-        return _dispatchOneTimeMessage(key, data, allowTraceBack, onlyTraceBack);
+        return await _dispatchOneTimeMessage(key, data, allowTraceBack, onlyTraceBack);
     }
 
     /// 实际分发一次性消息的逻辑
@@ -272,9 +284,9 @@ abstract class Scope {
         // 如果自身无法处理，则会向下追溯寻求解决方法
         // 但是如果只做向上回溯的话，那么该步骤会被忽略
         if(!onlyTraceBack && _children != null) {
-            final childrenCopies = List.from(_children);
+            final childrenCopies = List<Scope>.from(_children);
             for(int i = 0 ; i < childrenCopies.length ; i ++) {
-                final childRes = await childrenCopies[i]._dispatchOneTimeMessage(key, data, false);
+                final childRes = await childrenCopies[i]._dispatchOneTimeMessage(key, data, false, false);
                 // 如果在子项中找到了解决方法，那么会将子域结果返回，
                 // 并中断本次回溯
                 if(childRes != null) {
@@ -330,7 +342,7 @@ abstract class Scope {
     /// 由该 Scope 向父级 Scope 传递消息
     /// @params traceCount 表示向上回溯次数，默认会向上回溯一次
     Future dispatchParentMessage(dynamic key, dynamic data, { int traceCount = 1}) async {
-        return _dispatchParentMessage(key, data, traceCount);
+        return await _dispatchParentMessage(key, data, traceCount);
     }
 
     /// 实际向上分发消息的逻辑
@@ -350,6 +362,88 @@ abstract class Scope {
         if(parent != null && (nextTraceCount == null || (nextTraceCount >= 0))) {
             await parent._dispatchParentMessage(key, data, nextTraceCount);
         }
+    }
+
+    /// 分发同代消息
+    /// 对自己及同父 Scope 下的表兄弟分发消息
+    Future dispatchCousinMessage(dynamic key, dynamic data) async {
+        return await _dispatchCousinMessage(key, data);
+    }
+
+    /// 实际分发同代消息
+    Future _dispatchCousinMessage(dynamic key, dynamic data) async {
+        if(_scopeStatus == ScopeStatus.destroy) {
+            return;
+        }
+
+        final parent = this._parent;
+        if(parent != null) {
+            await parent.dispatchMessage(key, data);
+        }
+        else {
+            final selfCallback = await _getCallbackByKey(key);
+            if(selfCallback != null) {
+                await _invokeScopeMessageCallback(data, selfCallback);
+            }
+        }
+    }
+
+    /// 分发一次性同代消息
+    /// 当找到可以处理对应消息的消息回调时，将会中断遍历立即返回执行结果（Future）
+    Future dispatchCousinOneTimeMessage(dynamic key, dynamic data) async {
+        return await _dispatchCousinOneTimeMessage(key, data);
+    }
+
+    /// 实际分发一次性同代消息
+    Future _dispatchCousinOneTimeMessage(dynamic key, dynamic data) async {
+        if(_scopeStatus == ScopeStatus.destroy) {
+            return null;
+        }
+
+        final parent = this._parent;
+        if(parent != null) {
+            return await parent._dispatchOneTimeMessage(key, data, false, false);
+        }
+        else {
+            final selfCallback = await _getCallbackByKey(key);
+            if(selfCallback != null) {
+                return await _invokeScopeMessageCallback(data, selfCallback);
+            }
+        }
+
+        return null;
+    }
+
+    /// 向指定 id 的子 Scope 分发消息
+    /// 如果直接子 Scope 不存在指定 id，可以设置 `onlyAllowDirectChildren = false`
+    /// 进行深度遍历.
+    Future dispatchSpecifiedMessage(dynamic id, dynamic key, dynamic data, { bool onlyAllowDirectChildren = true } ) async {
+        await _dispatchSpecifiedMessage(id, key, data, onlyAllowDirectChildren);
+        return;
+    }
+
+    /// 实际向指定 id 的子 Scope 分发消息
+    Future<bool> _dispatchSpecifiedMessage(dynamic id, dynamic key, dynamic data, bool onlyAllowDirectChildren) async {
+        if(_scopeStatus == ScopeStatus.destroy) {
+            return false;
+        }
+
+        final directlyChild = _scopeIdMap != null ? _scopeIdMap[id] : null;
+        if(directlyChild != null) {
+            await directlyChild._dispatchMessage(key, data);
+            return true;
+        }
+        else if(_children != null && !onlyAllowDirectChildren) {
+            final childrenCopies = List<Scope>.from(_children);
+            for(int i = 0 ; i < childrenCopies.length ; i ++) {
+                final isFound = await childrenCopies[i]._dispatchSpecifiedMessage(id, key, data, onlyAllowDirectChildren);
+                if(isFound) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /// 根据给定的键值找到对应的消息回调
@@ -772,6 +866,8 @@ class _RootScope extends Scope {
 
 /// 一般作用域
 class GeneralScope extends Scope {
+    GeneralScope({String scopeName, String scopeId}) : super(scopeName: scopeName, scopeId: scopeId);
+
     @override
     void onActivated() {
 
@@ -786,4 +882,5 @@ class GeneralScope extends Scope {
     void onDeactivated() {
 
     }
+
 }
