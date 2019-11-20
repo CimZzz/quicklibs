@@ -866,7 +866,7 @@ class _RootScope extends Scope {
 
 /// 一般作用域
 class GeneralScope extends Scope {
-    GeneralScope({String scopeName, String scopeId}) : super(scopeName: scopeName, scopeId: scopeId);
+    GeneralScope({String scopeName, dynamic scopeId}) : super(scopeName: scopeName, scopeId: scopeId);
 
     @override
     void onActivated() {

@@ -56,3 +56,7 @@
 - Scope 新增分发同代消息方法
 - Scope 新增分发一次性同代消息方法
 - Scope 新增向指定 id 的 Scope 分发消息方法
+
+## 1.1.9
+
+- 修复 GeneralScope 的 scopeId 只能是字符串类型的问题，现在其可以指定为 dynamic 类型了
