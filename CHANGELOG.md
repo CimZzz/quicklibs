@@ -45,3 +45,8 @@
 ## 1.1.6
 
 - 新增转换对象类型方法
+
+## 1.1.7
+
+- Scope 新增存储数据方法 `StoredData`
+- Scope.rootScope 不能成为其他 Scope 的子 Scope

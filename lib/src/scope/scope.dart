@@ -144,6 +144,7 @@ abstract class Scope {
         dropChildren();
         _destroyActiveDelay();
         _destroyBroadcast();
+        _destroyStoredData();
         ///
         this.onDestroy();
     }
@@ -161,10 +162,14 @@ abstract class Scope {
     List<Scope> _children;
 
     /// 将参数中的 Scope 作为当前 Scope 的子域
+    /// * [Scope.rootScope] 不能作为子 Scope
     T fork<T extends Scope>(T scope) {
         assert(scope != null);
         assert(scope._scopeStatus != ScopeStatus.destroy);
         assert(_scopeStatus != ScopeStatus.destroy);
+        if(scope == Scope._rootScope) {
+            return null;
+        }
         if(scope == null) {
             return null;
         }
@@ -647,6 +652,87 @@ abstract class Scope {
     }
 
     //
+    // 状态存储（重要）
+    // 可以往 Scope 中存储数据，实现快捷存储的目的
+    // 目前可以向自身与父 Scope 中读写数据
+
+    /// 存储数据所用对象
+    Map _storedDataMapObj;
+    Map get _storedDataMap {
+        return this._storedDataMapObj ??= Map();
+    }
+
+    /// 获取存储的数据
+    /// 如果没有找到对应数据，可以设置 `fromParentIfNotExist = true` 从父 Scope 中
+    /// 获取对应 Key 下的数据，如果存在父 Scope 的话；如果父 Scope 仍然不存在数据，可以设置
+    /// `fromParentUntilNotExist = true`，如此会一直向上查找，直到找数据或已到达顶级 Scope.
+    /// * `untilNotExistParent` 只在 `fromParentIfNotExist = true` 下才生效.
+    /// 但是如果自身对应 Key 下存在数据，但是类型不匹配的话，会直接返回 `null`.
+    T getStoredData<T>(dynamic key, { bool fromParentIfNotExist = false, bool untilNotExistParent = false } ) {
+        dynamic result;
+        if(_storedDataMapObj != null) {
+            result = _storedDataMap[key];
+        }
+
+        if(result == null && fromParentIfNotExist) {
+            result = _parent?.getStoredData(
+                key,
+                fromParentIfNotExist: untilNotExistParent,
+                untilNotExistParent: untilNotExistParent
+            );
+        }
+
+        if(result is T) {
+            return result;
+        }
+
+        return null;
+    }
+
+    /// 设置存储数据
+    /// 可以设置 `syncParent = true`，同时会将数据同步到父 Scope 中；若想同步全部父 Scope，
+    /// 设置 `untilNotExistParent = true` 会一直向上同步，直到到达顶级 Scope.
+    T setStoredData<T>(dynamic key, T data, { bool syncParent = false,  bool untilNotExistParent = false }) {
+        _storedDataMap[key] = data;
+        if(syncParent) {
+            _parent?.setStoredData<T>(
+                key,
+                data,
+                syncParent: untilNotExistParent,
+                untilNotExistParent: untilNotExistParent
+            );
+        }
+
+        return data;
+    }
+
+    /// 只设置父 Scope 存储数据，不影响自身
+    T setParentStoredData<T>(dynamic key, T data, { bool syncParent = false,  bool untilNotExistParent = false }) {
+        return _parent?.setStoredData<T>(
+            key,
+            data,
+            syncParent: syncParent,
+            untilNotExistParent: untilNotExistParent
+        );
+    }
+
+    /// 重置存储所用的全部数据
+    /// * 只会重置自身存储的数据，不影响父 Scope 中的数据
+    void resetStoredData() {
+        if(this._storedDataMapObj != null) {
+            this._storedDataMapObj.clear();
+            this._storedDataMapObj = null;
+        }
+    }
+
+    /// 销毁存储所用的全部数据
+    /// * 只会销毁自身存储的数据，不影响父 Scope 中的数据
+    void _destroyStoredData() {
+        resetStoredData();
+    }
+
+
+    //
     // 子类需要实现的方法
     //
     //
@@ -673,17 +759,14 @@ class _RootScope extends Scope {
 
     @override
     void onActivated() {
-        // TODO: implement onActivated
     }
 
     @override
     void onDeactivated() {
-        // TODO: implement onDeactivated
     }
 
     @override
     void onDestroy() {
-        // TODO: implement onDestroy
     }
 }
 

@@ -1,7 +1,7 @@
 import 'package:quicklibs/quicklibs.dart';
 
 void main() {
-    example8();
+    example10();
 }
 
 /// 测试样例1
@@ -171,4 +171,37 @@ void example8() async {
     String task3Result = await scope.proxyAsync(task3);
 
     print("task1Result -> $task1Result, task2Result -> $task2Result, task3Result -> $task3Result");
+}
+
+/// 测试样例9
+/// 创建 Scope，测试向上发布消息
+void example9() async {
+    // 向根 Scope 注册一个消息回调，实例一个 Scope 作为其
+    // 子 Scope 并向上发布消息.
+    Scope.rootScope.registerMessageCallback("root", (data) async {
+        print(data);
+    });
+
+    final scope = GeneralScope();
+    Scope.rootScope.fork(scope);
+    scope.dispatchParentMessage("root", "hello world");
+}
+
+/// 测试样例10
+/// 创建 Scope，测试存储数据，以及向上存储数据
+void example10() async {
+    final grandchild = GeneralScope();
+    final child = GeneralScope();
+    final self = Scope.rootScope;
+
+    self.fork(child);
+    child.fork(grandchild);
+
+    // `syncParent = true`，数据会同步到父 Scope
+    // `untilNotExistParent = true`，数据会一直同步到根 Scope
+    grandchild.setStoredData("number", "hello world", syncParent: true, untilNotExistParent: true);
+
+    print(grandchild.getStoredData("number"));
+    print(child.getStoredData("number"));
+    print(self.getStoredData("number"));
 }

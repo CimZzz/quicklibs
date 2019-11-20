@@ -898,6 +898,22 @@ Future<T> proxyAsync<T>(ScopeProxyAsyncRunnable<T> runnable) async;
 /// 代理同步执行回调
 /// 当 Scope 状态为销毁状态时返回 null
 T proxySync<T>(ScopeProxySyncRunnable<T> runnable);
+/// 设置存储数据
+/// 可以设置 `syncParent = true`，同时会将数据同步到父 Scope 中；若想同步全部父 Scope，
+/// 设置 `untilNotExistParent = true` 会一直向上同步，直到到达顶级 Scope.
+T setStoredData<T>(dynamic key, T data, { bool syncParent = false,  bool untilNotExistParent = false } );
+/// 只设置父 Scope 存储数据，不影响自身
+T setParentStoredData<T>(dynamic key, T data, { bool syncParent = false,  bool untilNotExistParent = false });
+/// 获取存储的数据
+/// 如果没有找到对应数据，可以设置 `fromParentIfNotExist = true` 从父 Scope 中
+/// 获取对应 Key 下的数据，如果存在父 Scope 的话；如果父 Scope 仍然不存在数据，可以设置
+/// `fromParentUntilNotExist = true`，如此会一直向上查找，直到找数据或已到达顶级 Scope.
+/// * `untilNotExistParent` 只在 `fromParentIfNotExist = true` 下才生效.
+/// 但是如果自身对应 Key 下存在数据，但是类型不匹配的话，会直接返回 `null`.
+T getStoredData<T>(dynamic key, { bool fromParentIfNotExist = false, bool untilNotExistParent = false });
+/// 重置存储所用的全部数据
+/// * 只会重置自身存储的数据，不影响父 Scope 中的数据
+void resetStoredData();
 ```
 
 详细见[使用样例](example/scope/scope.dart)
