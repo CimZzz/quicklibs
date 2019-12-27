@@ -343,7 +343,7 @@ abstract class Scope {
     /// 向下分发消息
     /// 由该 Scope 其子域分发消息
     Future dispatchChildMessage(dynamic key, dynamic data) async {
-        return _dispatchMessage(key, data);
+        return _dispatchChildMessage(key, data);
     }
 
     /// 实际向下分发消息的逻辑

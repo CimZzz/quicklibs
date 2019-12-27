@@ -63,4 +63,8 @@
 
 ## 1.2.0
 
-- Scope 新增 dispatchChildMessage 方法，可以向子项发送消息了
+- Scope 新增 dispatchChildMessage 方法，可以向子项发送消息
+
+## 1.2.0+1
+
+- 修复 dispatchChildMessage 方法发送错误的问题

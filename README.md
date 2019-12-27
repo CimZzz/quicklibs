@@ -1,11 +1,11 @@
 ## 开始使用
 
-当前最新版本为: 1.2.0
+当前最新版本为: 1.2.0+1
 
 在 "pubspec.yaml" 文件中加入
 ```yaml
 dependencies:
-  quicklibs: ^1.2.0
+  quicklibs: ^1.2.0+1
 ```
 
 github
@@ -875,6 +875,9 @@ void unregisterMessageCallback(dynamic key);
 Future dispatchOneTimeMessage(dynamic key, dynamic data, {bool allowTraceBack = false, bool onlyTrackBack = false}) async;
 /// 向下分发消息，会触发相同 key 值下全部的接收器
 Future dispatchMessage(dynamic key, dynamic data) async;
+/// 向下分发消息
+/// 由该 Scope 其子域分发消息
+Future dispatchChildMessage(dynamic key, dynamic data) async;
 /// 向上分发消息
 /// 由该 Scope 向父级 Scope 传递消息
 Future dispatchParentMessage(dynamic key, dynamic data, { int traceCount = 1}) async;
