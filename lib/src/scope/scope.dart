@@ -338,6 +338,28 @@ abstract class Scope {
         }
     }
 
+
+
+    /// 向下分发消息
+    /// 由该 Scope 其子域分发消息
+    Future dispatchChildMessage(dynamic key, dynamic data) async {
+        return _dispatchMessage(key, data);
+    }
+
+    /// 实际向下分发消息的逻辑
+    void _dispatchChildMessage(dynamic key, dynamic data) async {
+        if(_scopeStatus == ScopeStatus.destroy) {
+            return;
+        }
+
+        if(_children != null) {
+            final childrenCopies = List.from(_children);
+            for(int i = 0 ; i < childrenCopies.length ; i ++) {
+                childrenCopies[i]._dispatchMessage(key, data);
+            }
+        }
+    }
+
     /// 向上分发消息
     /// 由该 Scope 向父级 Scope 传递消息
     /// @params traceCount 表示向上回溯次数，默认会向上回溯一次

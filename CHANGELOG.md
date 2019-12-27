@@ -60,3 +60,7 @@
 ## 1.1.9
 
 - 修复 GeneralScope 的 scopeId 只能是字符串类型的问题，现在其可以指定为 dynamic 类型了
+
+## 1.2.0
+
+- Scope 新增 dispatchChildMessage 方法，可以向子项发送消息了
